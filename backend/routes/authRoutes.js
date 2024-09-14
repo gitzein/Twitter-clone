@@ -1,14 +1,11 @@
 const express = require("express");
+const authController = require("../controllers/authController");
+const protectRoute = require("../middleware/protectRoute");
 const router = express.Router();
 
-router.get("/signup", (req, res) => {
-  res.json({ message: "You hit the signup endpoint" });
-});
-router.get("/login", (req, res) => {
-  res.json({ message: "You hit the login endpoint" });
-});
-router.get("/logout", (req, res) => {
-  res.json({ message: "You hit the logout endpoint" });
-});
+router.get("/me", protectRoute, authController.getMe);
+router.post("/signup", authController.signup);
+router.post("/login", authController.login);
+router.post("/logout", authController.logout);
 
 module.exports = router;
