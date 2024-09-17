@@ -5,10 +5,17 @@ const mongoose = require("mongoose");
 const connectDB = require("./config/dbConn");
 const cookieParser = require("cookie-parser");
 const app = express();
+const { v2: cloudinary } = require("cloudinary");
 
 const PORT = process.env.PORT || 3500;
 
 connectDB();
+
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET,
+});
 
 app.use(express.json()); // to parse req.body
 
@@ -17,6 +24,7 @@ app.use(express.urlencoded({ extended: true })); // to parse form data(urlencode
 app.use(cookieParser());
 
 app.use("/api/auth", require("./routes/authRoutes"));
+app.use("/api/users", require("./routes/userRoutes"));
 
 mongoose.connection.once("connected", () => {
   app.listen(PORT, () => {

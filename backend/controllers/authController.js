@@ -88,7 +88,6 @@ const login = async (req, res) => {
 
 const logout = async (req, res) => {
   const cookies = req.cookies;
-  console.log(cookies);
 
   if (!cookies?.jwt) return res.sendStatus(204); // No content
   res.clearCookie("jwt", { httpOnly: true, sameSite: "strict", secure: true });
@@ -96,12 +95,7 @@ const logout = async (req, res) => {
 };
 
 const getMe = async (req, res) => {
-  console.log(req.user);
-
-  const user = await User.findById(req.user._id).select("-password");
-  console.log(user);
-
-  res.json(user);
+  res.json(req.user);
 };
 
 module.exports = { signup, login, logout, getMe };
