@@ -50,7 +50,7 @@ const signup = async (req, res) => {
       coverImg: newUser.coverImg,
     });
   } else {
-    res.status(400), json({ message: "Invalid user data" });
+    res.status(400).json({ message: "Invalid user data" });
   }
 };
 
@@ -64,13 +64,12 @@ const login = async (req, res) => {
   const foundUser = await User.findOne({ username }).lean().exec();
 
   if (!foundUser)
-    return res
-      .status(400)
-      .json({ message: `User ${username} does not exixt.` });
+    return res.status(400).json({ message: `Invalid useranme or password` });
 
   const matchPwd = await bcrypt.compare(password, foundUser.password);
 
-  if (!matchPwd) return res.status(401).json({ message: "Unauthorized" });
+  if (!matchPwd)
+    return res.status(400).json({ message: "Invalid username or password" });
 
   generateTokenAndSetCookie(foundUser._id, res);
 
