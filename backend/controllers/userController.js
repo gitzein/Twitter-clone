@@ -59,7 +59,7 @@ const followOrUnfollowUser = async (req, res) => {
     await newNotification.save();
     await user.save();
     await targetedUser.save();
-    return res.status(200).json({ message: "Followed" });
+    return res.json({ message: "Followed" });
   }
 };
 

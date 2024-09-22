@@ -14,7 +14,8 @@ const Post = ({ post }) => {
   const { data: authUser } = useQuery({ queryKey: ["authUser"] });
   const queryClient = useQueryClient();
   const postOwner = post.user;
-  const isLiked = false;
+  const postId = post._id;
+  const isLiked = authUser.likedPosts.includes(postId);
 
   const isMyPost = post.user._id === authUser._id;
 
@@ -25,12 +26,11 @@ const Post = ({ post }) => {
   const {
     mutate: deleteMutation,
     isPending,
-    data: resMsg,
     error,
   } = useMutation({
     mutationFn: async () => {
       try {
-        const res = await fetch(`/api/posts/delete/${post._id}`, {
+        const res = await fetch(`/api/posts/delete/${postId}`, {
           method: "DELETE",
         });
         const data = await res.json();
@@ -47,16 +47,34 @@ const Post = ({ post }) => {
     onError: () => toast.error(error.message),
   });
 
+  const { mutate: likePost } = useMutation({
+    mutationFn: async (postId) => {
+      try {
+        const res = await fetch(`/api/posts/like/${postId}`, {
+          method: "POST",
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.message || "Something went wrong");
+        return data;
+      } catch (error) {
+        throw error;
+      }
+    },
+    onError: (error) => toast.error(error),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["posts"] }),
+  });
+
   const handleDeletePost = () => {
     deleteMutation();
-    console.log(resMsg);
   };
 
   const handlePostComment = (e) => {
     e.preventDefault();
   };
 
-  const handleLikePost = () => {};
+  const handleLikePost = () => {
+    likePost(postId);
+  };
 
   return (
     <>
@@ -109,9 +127,7 @@ const Post = ({ post }) => {
               <div
                 className="flex gap-1 items-center cursor-pointer group"
                 onClick={() =>
-                  document
-                    .getElementById("comments_modal" + post._id)
-                    .showModal()
+                  document.getElementById("comments_modal" + postId).showModal()
                 }
               >
                 <FaRegComment className="w-4 h-4  text-slate-500 group-hover:text-sky-400" />
@@ -121,7 +137,7 @@ const Post = ({ post }) => {
               </div>
               {/* We're using Modal Component from DaisyUI */}
               <dialog
-                id={`comments_modal${post._id}`}
+                id={`comments_modal${postId}`}
                 className="modal border-none outline-none"
               >
                 <div className="modal-box rounded border border-gray-600">
