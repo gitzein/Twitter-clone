@@ -8,6 +8,7 @@ import toast from "react-hot-toast";
 const CreatePost = () => {
   const [text, setText] = useState("");
   const [img, setImg] = useState(null);
+  const [isImgSizeAllowed, setIsImgSizeAllowed] = useState(true);
   const imgRef = useRef(null);
 
   const { data } = useQuery({ queryKey: ["authUser"] });
@@ -19,7 +20,7 @@ const CreatePost = () => {
     isError,
     error,
   } = useMutation({
-    mutationFn: async (text, img) => {
+    mutationFn: async ({ text, img }) => {
       try {
         const res = await fetch("/api/posts/create", {
           method: "POST",
@@ -27,9 +28,12 @@ const CreatePost = () => {
           body: JSON.stringify({ text, img }),
         });
         const data = await res.json();
-        console.log(data);
-
-        if (!res.ok) throw new Error(data.message || "Something went wrong");
+        console.log(res.status);
+        if (res.status === 413) {
+          throw new Error("File size too large (Max 5 MB)");
+        } else if (!res.ok) {
+          throw new Error(data.message || "Something went wrong");
+        }
         return data;
       } catch (error) {
         throw new Error(error);
@@ -46,17 +50,21 @@ const CreatePost = () => {
   const handleSubmit = (e) => {
     e.preventDefault();
 
-    createPostMutation(text, img);
+    createPostMutation({ text, img });
   };
 
   const handleImgChange = (e) => {
     const file = e.target.files[0];
+    const size = file.size;
     if (file) {
       const reader = new FileReader();
       reader.onload = () => {
         setImg(reader.result);
       };
       reader.readAsDataURL(file);
+    }
+    if (size / 1024 > 5000) {
+      setIsImgSizeAllowed(false);
     }
   };
 
@@ -81,6 +89,7 @@ const CreatePost = () => {
               onClick={() => {
                 setImg(null);
                 imgRef.current.value = null;
+                setIsImgSizeAllowed(true);
               }}
             />
             <img
@@ -100,13 +109,18 @@ const CreatePost = () => {
           </div>
           <input type="file" hidden ref={imgRef} onChange={handleImgChange} />
           <button
-            disabled={isPending}
+            disabled={isPending || !isImgSizeAllowed}
             className="btn btn-primary rounded-full btn-sm text-white px-4"
           >
             {isPending ? "Posting..." : "Post"}
           </button>
         </div>
         {isError && <div className="text-red-500">{error.message}</div>}
+        {!isImgSizeAllowed && (
+          <div className="text-red-500">
+            file size must not be greater than to 5MB
+          </div>
+        )}
       </form>
     </div>
   );
