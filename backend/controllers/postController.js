@@ -42,12 +42,14 @@ const likeOrUnlikePost = async (req, res) => {
     // Like
     post.likes.push(userId);
     user.likedPosts.push(postId);
-    const notification = new Notification({
-      from: userId,
-      to: post.user,
-      type: "like",
-    });
-    await notification.save();
+    if (userId != post.user.toString()) {
+      const notification = new Notification({
+        from: userId,
+        to: post.user,
+        type: "like",
+      });
+      await notification.save();
+    }
   }
   await user.save();
   await post.save();
