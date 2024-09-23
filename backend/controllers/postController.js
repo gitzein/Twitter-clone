@@ -34,10 +34,12 @@ const likeOrUnlikePost = async (req, res) => {
 
   const isPostLiked = post.likes.indexOf(userId);
   if (isPostLiked !== -1) {
+    // Unlike
     const likedPostIndex = user.likedPosts.indexOf(postId);
     post.likes.splice(isPostLiked, 1);
     user.likedPosts.splice(likedPostIndex, 1);
   } else {
+    // Like
     post.likes.push(userId);
     user.likedPosts.push(postId);
     const notification = new Notification({
@@ -51,6 +53,7 @@ const likeOrUnlikePost = async (req, res) => {
   await post.save();
   res.json(post.likes);
 };
+
 const commentPost = async (req, res) => {
   const userId = req.user._id;
   const postId = req.params.id;
@@ -71,7 +74,7 @@ const commentPost = async (req, res) => {
   post.comments.push(commentObj);
 
   post.save();
-  res.json(commentObj);
+  res.json(post.comments);
 };
 
 const deletePost = async (req, res) => {
