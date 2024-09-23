@@ -3,11 +3,17 @@ import PostSkeleton from "../skeletons/PostSkeleton";
 import { useQuery } from "@tanstack/react-query";
 import { useEffect } from "react";
 
-const Posts = ({ feedType }) => {
+const Posts = ({ feedType, username, userId }) => {
   let POST_ENDPOINT;
   switch (feedType) {
     case "following":
       POST_ENDPOINT = "/api/posts/following";
+      break;
+    case "posts":
+      POST_ENDPOINT = `/api/posts/user/${username}`;
+      break;
+    case "likes":
+      POST_ENDPOINT = `/api/posts/likes/${userId}`;
       break;
     default:
       POST_ENDPOINT = "/api/posts/all";
@@ -35,7 +41,7 @@ const Posts = ({ feedType }) => {
 
   useEffect(() => {
     refetch();
-  }, [feedType, refetch]);
+  }, [feedType, refetch, username, userId]);
 
   return (
     <>

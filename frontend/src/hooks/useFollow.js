@@ -6,6 +6,7 @@ export const useFollow = () => {
 
   const { mutate: follow, isPending } = useMutation({
     mutationFn: async (id) => {
+      if (!id) return toast.error("User id must be provided");
       try {
         const res = await fetch(`/api/users/follow/${id}`, {
           method: "POST",
@@ -18,8 +19,10 @@ export const useFollow = () => {
       }
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["suggestedUsers"] });
-      queryClient.invalidateQueries({ queryKey: ["authUser"] });
+      Promise.all([
+        queryClient.invalidateQueries({ queryKey: ["suggestedUsers"] }),
+        queryClient.invalidateQueries({ queryKey: ["authUser"] }),
+      ]);
     },
     onError: (error) => toast.error(error.message),
   });
