@@ -33,12 +33,10 @@ const likeOrUnlikePost = async (req, res) => {
   if (!post) return res.status(400).json({ message: "Post doesn't exist" });
 
   const isPostLiked = post.likes.indexOf(userId);
-  let resMsg = "";
   if (isPostLiked !== -1) {
     const likedPostIndex = user.likedPosts.indexOf(postId);
     post.likes.splice(isPostLiked, 1);
     user.likedPosts.splice(likedPostIndex, 1);
-    resMsg = "Unliked";
   } else {
     post.likes.push(userId);
     user.likedPosts.push(postId);
@@ -48,11 +46,10 @@ const likeOrUnlikePost = async (req, res) => {
       type: "like",
     });
     await notification.save();
-    resMsg = "Liked";
   }
   await user.save();
   await post.save();
-  res.json({ message: `${resMsg}` });
+  res.json(post.likes);
 };
 const commentPost = async (req, res) => {
   const userId = req.user._id;

@@ -1,6 +1,7 @@
 import { FaRegComment } from "react-icons/fa";
 import { BiRepost } from "react-icons/bi";
 import { FaRegHeart } from "react-icons/fa";
+import { FaHeart } from "react-icons/fa6";
 import { FaRegBookmark } from "react-icons/fa6";
 import { FaTrash } from "react-icons/fa";
 import { useState } from "react";
@@ -11,21 +12,19 @@ import LoadingSpinner from "./LoadingSpinner";
 
 const Post = ({ post }) => {
   const [comment, setComment] = useState("");
-  const { data: authUser } = useQuery({ queryKey: ["authUser"] });
   const queryClient = useQueryClient();
   const postOwner = post.user;
   const postId = post._id;
-  const isLiked = authUser.likedPosts.includes(postId);
+  const { data: authUser } = useQuery({ queryKey: ["authUser"] });
+  const isLiked = post.likes.includes(authUser._id);
 
   const isMyPost = post.user._id === authUser._id;
 
   const formattedDate = "1h";
 
-  const isCommenting = false;
-
   const {
     mutate: deleteMutation,
-    isPending,
+    isPending: isDeleting,
     error,
   } = useMutation({
     mutationFn: async () => {
@@ -47,7 +46,7 @@ const Post = ({ post }) => {
     onError: () => toast.error(error.message),
   });
 
-  const { mutate: likePost } = useMutation({
+  const { mutate: likePost, isPending: likingPending } = useMutation({
     mutationFn: async (postId) => {
       try {
         const res = await fetch(`/api/posts/like/${postId}`, {
@@ -61,7 +60,47 @@ const Post = ({ post }) => {
       }
     },
     onError: (error) => toast.error(error),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["posts"] }),
+    onSuccess: (updatedLikes) =>
+      // this is not the best UX, bc it will refetch all posts
+      // queryClient.invalidateQueries({ queryKey: ["posts"] });
+
+      // instead, update the cache directly for that post
+      queryClient.setQueryData(["posts"], (oldData) => {
+        return oldData.map((oldPost) => {
+          if (oldPost._id === postId) {
+            return { ...oldPost, likes: updatedLikes };
+          }
+          return oldPost;
+        });
+      }),
+  });
+
+  const { mutate: postComment, isPending: isCommenting } = useMutation({
+    mutationFn: async (text) => {
+      try {
+        const res = await fetch(`/api/posts/comment/${postId}`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ text }),
+        });
+        const data = await res.json();
+        if (res.status === 400) {
+          throw new Error(data.message || "Something went wrong");
+        } else if (!res.ok) {
+          throw new Error("Something went wrong");
+        }
+        return data;
+      } catch (error) {
+        throw new Error(error);
+      }
+    },
+    onError: (error) => {
+      toast.error(error.message);
+      console.log(error);
+    },
+    onSuccess: () =>
+      // this is not the best UX, bc it will refetch all posts
+      queryClient.invalidateQueries({ queryKey: ["posts"] }),
   });
 
   const handleDeletePost = () => {
@@ -70,9 +109,11 @@ const Post = ({ post }) => {
 
   const handlePostComment = (e) => {
     e.preventDefault();
+    postComment(comment);
   };
 
   const handleLikePost = () => {
+    if (likingPending) return;
     likePost(postId);
   };
 
@@ -101,7 +142,7 @@ const Post = ({ post }) => {
             </span>
             {isMyPost && (
               <span className="flex justify-end flex-1">
-                {isPending ? (
+                {isDeleting ? (
                   <LoadingSpinner size="sm" />
                 ) : (
                   <FaTrash
@@ -185,11 +226,7 @@ const Post = ({ post }) => {
                       onChange={(e) => setComment(e.target.value)}
                     />
                     <button className="btn btn-primary rounded-full btn-sm text-white px-4">
-                      {isCommenting ? (
-                        <span className="loading loading-spinner loading-md"></span>
-                      ) : (
-                        "Post"
-                      )}
+                      {isCommenting ? <LoadingSpinner size="md" /> : "Post"}
                     </button>
                   </form>
                 </div>
@@ -207,11 +244,10 @@ const Post = ({ post }) => {
                 className="flex gap-1 items-center group cursor-pointer"
                 onClick={handleLikePost}
               >
-                {!isLiked && (
+                {!isLiked ? (
                   <FaRegHeart className="w-4 h-4 cursor-pointer text-slate-500 group-hover:text-pink-500" />
-                )}
-                {isLiked && (
-                  <FaRegHeart className="w-4 h-4 cursor-pointer text-pink-500 " />
+                ) : (
+                  <FaHeart className="w-4 h-4 cursor-pointer text-pink-500 " />
                 )}
 
                 <span
