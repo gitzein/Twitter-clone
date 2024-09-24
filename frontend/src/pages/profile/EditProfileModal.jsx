@@ -1,6 +1,12 @@
-import { useState } from "react";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useEffect, useState } from "react";
+import toast from "react-hot-toast";
+import { useNavigate } from "react-router-dom";
 
-const EditProfileModal = () => {
+const EditProfileModal = ({ authUser }) => {
+  const navigate = useNavigate();
+  const [showErrMsg, setShowErrMsg] = useState(false);
+  const [currPwErr, setCurrPwErr] = useState(false);
   const [formData, setFormData] = useState({
     fullName: "",
     username: "",
@@ -11,9 +17,77 @@ const EditProfileModal = () => {
     currentPassword: "",
   });
 
+  const queryClient = useQueryClient();
+
+  const {
+    mutate: updateUser,
+    isPending,
+    error,
+    isError,
+  } = useMutation({
+    mutationFn: async (formData) => {
+      try {
+        const res = await fetch("/api/users/update", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(formData),
+        });
+        const data = await res.json();
+        if (res.status === 400 || res.status === 409) {
+          throw new Error(data.message);
+        } else if (!res.ok) {
+          throw new Error("Something went wrong");
+        }
+
+        return data;
+      } catch (error) {
+        throw error;
+      }
+    },
+    onSuccess: (updatedData) => {
+      Promise.all([
+        queryClient.invalidateQueries({ queryKey: ["userProfile"] }),
+        queryClient.invalidateQueries({ queryKey: ["authUser"] }),
+      ]);
+      toast.success("Updated");
+      navigate(`/profile/${updatedData.username}`);
+    },
+  });
+
   const handleInputChange = (e) => {
+    if (formData.currentPassword.length == 0) {
+      setCurrPwErr(true);
+    } else {
+      setCurrPwErr(false);
+    }
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    updateUser(formData);
+  };
+
+  useEffect(() => {
+    setShowErrMsg(true);
+    setTimeout(() => {
+      setShowErrMsg(false);
+    }, 4000);
+  }, [isError]);
+
+  useEffect(() => {
+    if (authUser) {
+      setFormData({
+        fullName: authUser?.fullName,
+        username: authUser?.username,
+        email: authUser?.email,
+        bio: authUser?.bio,
+        link: authUser?.link,
+        newPassword: "",
+        currentPassword: "",
+      });
+    }
+  }, [authUser]);
 
   return (
     <>
@@ -74,10 +148,14 @@ const EditProfileModal = () => {
               <input
                 type="password"
                 placeholder="Current Password"
-                className="flex-1 input border border-gray-700 rounded p-2 input-md"
+                className={
+                  "flex-1 input border rounded p-2 input-md " +
+                  (currPwErr ? "border-red-500" : "border-gray-700")
+                }
                 value={formData.currentPassword}
                 name="currentPassword"
                 onChange={handleInputChange}
+                required
               />
               <input
                 type="password"
@@ -96,8 +174,22 @@ const EditProfileModal = () => {
               name="link"
               onChange={handleInputChange}
             />
-            <button className="btn btn-primary rounded-full btn-sm text-white">
-              Update
+            {/* {showErrMsg && (
+              <div className="text-red-500 mx-auto">{error?.message}</div>
+            )} */}
+            <button
+              onClick={handleSubmit}
+              disabled={currPwErr}
+              className={
+                "btn rounded-full btn-sm text-white " +
+                (showErrMsg ? "bg-red-500 hover:bg-red-600" : "btn-primary")
+              }
+            >
+              {isPending
+                ? "Updating..."
+                : showErrMsg
+                ? error?.message
+                : "Update"}
             </button>
           </form>
         </div>

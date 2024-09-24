@@ -56,15 +56,15 @@ const CreatePost = () => {
   const handleImgChange = (e) => {
     const file = e.target.files[0];
     const size = file.size;
-    if (file) {
+    if (file && size / 1024 > 5000) {
+      setIsImgSizeAllowed(false);
+    }
+    if (file && isImgSizeAllowed) {
       const reader = new FileReader();
       reader.onload = () => {
         setImg(reader.result);
       };
       reader.readAsDataURL(file);
-    }
-    if (size / 1024 > 5000) {
-      setIsImgSizeAllowed(false);
     }
   };
 

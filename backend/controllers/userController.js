@@ -100,11 +100,11 @@ const updateUser = async (req, res) => {
   if (currentPassword) {
     const matchPwd = await bcrypt.compare(currentPassword, user.password);
     if (!matchPwd) return res.status(400).json({ message: "Invalid password" });
-  } else {
-    return res.status(400).json({ message: "currentPassword are required" });
+  } else if (!coverImg && !profileImg && !currentPassword) {
+    return res.status(400).json({ message: "current password are required" });
   }
 
-  if (username) {
+  if (username && username !== user.username) {
     const duplicate = await User.findOne({ username })
       .collation({ locale: "en", strength: 2 })
       .lean()
@@ -116,7 +116,7 @@ const updateUser = async (req, res) => {
     user.username = username;
   }
 
-  if (email) {
+  if (email && email !== user.email) {
     const duplicate = await User.findOne({ email })
       .collation({ locale: "en", strength: 2 })
       .lean()
@@ -135,7 +135,7 @@ const updateUser = async (req, res) => {
     if (newPassword.length < 6)
       return res
         .status(400)
-        .json({ message: "Password must be at least 6 characters long" });
+        .json({ message: "new Password must be at least 6 characters long" });
     user.password = await bcrypt.hash(newPassword, 10);
   }
 
@@ -154,7 +154,7 @@ const updateUser = async (req, res) => {
   if (coverImg) {
     if (user.coverImg) {
       await cloudinary.uploader.destroy(
-        user.coverImg.split("/").pop().splt(".")[0]
+        user.coverImg.split("/").pop().split(".")[0]
       );
     }
     const uploadResult = await cloudinary.uploader.upload(coverImg);

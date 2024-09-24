@@ -9,14 +9,19 @@ import { FaArrowLeft } from "react-icons/fa6";
 import { IoCalendarOutline } from "react-icons/io5";
 import { FaLink } from "react-icons/fa";
 import { MdEdit } from "react-icons/md";
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useFollow } from "../../hooks/useFollow";
+import { formatMemberSinceDate } from "../../utils/date";
+import toast from "react-hot-toast";
 
 const ProfilePage = () => {
   const [coverImg, setCoverImg] = useState(null);
   const [profileImg, setProfileImg] = useState(null);
+  const [isImgSizeAllowed, setIsImgSizeAllowed] = useState(true);
   const [feedType, setFeedType] = useState("posts");
   const { username } = useParams();
+
+  const queryClient = useQueryClient();
 
   const coverImgRef = useRef(null);
   const profileImgRef = useRef(null);
@@ -41,12 +46,54 @@ const ProfilePage = () => {
         throw error;
       }
     },
+    retry: false,
+  });
+
+  const { mutate: updateProfileImg, isPending: isUpdating } = useMutation({
+    mutationFn: async ({ coverImg, profileImg }) => {
+      try {
+        const res = await fetch("/api/users/update", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ coverImg, profileImg }),
+        });
+
+        const data = await res.json();
+        console.log(data);
+        if (res.status === 400 || res.status === 409) {
+          throw new Error(data.message);
+        } else if (!res.ok) {
+          throw new Error("Something went wrong");
+        }
+        return data;
+      } catch (error) {
+        throw error;
+      }
+    },
+    onSuccess: () => {
+      Promise.all([
+        queryClient.invalidateQueries({ queryKey: ["userProfile"] }),
+        queryClient.invalidateQueries({ queryKey: ["authUser"] }),
+      ]);
+      setCoverImg(null);
+      setProfileImg(null);
+      toast.success("Updated");
+    },
+    onError: (error) => toast.error(error.message),
   });
 
   const { follow, isPending } = useFollow();
 
   const handleImgChange = (e, state) => {
     const file = e.target.files[0];
+    const size = file?.size;
+    if (file && size / 1024 > 5000) {
+      setIsImgSizeAllowed(false);
+      toast.error("file size must not be greater than to 5MB");
+    }
+    if (file && size / 1024 <= 5000) {
+      setIsImgSizeAllowed(true);
+    }
     if (file) {
       const reader = new FileReader();
       reader.onload = () => {
@@ -59,6 +106,10 @@ const ProfilePage = () => {
 
   const isMyProfile = authUser._id === user?._id;
   const isFollowed = authUser.following.includes(user?._id);
+
+  const handleUpdate = () => {
+    updateProfileImg({ coverImg, profileImg });
+  };
 
   useEffect(() => {
     refetch();
@@ -136,7 +187,9 @@ const ProfilePage = () => {
                 </div>
               </div>
               <div className="flex justify-end px-4 mt-5">
-                {isMyProfile && <EditProfileModal />}
+                {isMyProfile && !coverImg && !profileImg && (
+                  <EditProfileModal authUser={authUser} />
+                )}
                 {!isMyProfile && (
                   <button
                     className="btn btn-outline rounded-full btn-sm"
@@ -150,12 +203,24 @@ const ProfilePage = () => {
                   </button>
                 )}
                 {(coverImg || profileImg) && (
-                  <button
-                    className="btn btn-primary rounded-full btn-sm text-white px-4 ml-2"
-                    onClick={() => alert("Profile updated successfully")}
-                  >
-                    Update
-                  </button>
+                  <div className="flex gap-2">
+                    <button
+                      className="btn btn-outline rounded-full btn-sm px-4"
+                      onClick={() => {
+                        setProfileImg("");
+                        setCoverImg("");
+                      }}
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      disabled={!isImgSizeAllowed || isUpdating}
+                      className="btn btn-primary rounded-full btn-sm text-white px-4"
+                      onClick={handleUpdate}
+                    >
+                      {isUpdating ? "Updating..." : "Update"}
+                    </button>
+                  </div>
                 )}
               </div>
 
@@ -187,7 +252,7 @@ const ProfilePage = () => {
                   <div className="flex gap-2 items-center">
                     <IoCalendarOutline className="w-4 h-4 text-slate-500" />
                     <span className="text-sm text-slate-500">
-                      Joined July 2021
+                      {formatMemberSinceDate(user?.createdAt)}
                     </span>
                   </div>
                 </div>
