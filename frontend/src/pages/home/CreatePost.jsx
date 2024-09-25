@@ -28,7 +28,6 @@ const CreatePost = () => {
           body: JSON.stringify({ text, img }),
         });
         const data = await res.json();
-        console.log(res.status);
         if (res.status === 413) {
           throw new Error("File size too large (Max 5 MB)");
         } else if (!res.ok) {

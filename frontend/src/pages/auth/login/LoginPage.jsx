@@ -37,7 +37,7 @@ const LoginPage = () => {
           throw new Error(data.message || "Something went wrong");
         }
       } catch (error) {
-        throw new Error(error);
+        throw error;
       }
     },
     onSuccess: () => {
@@ -90,10 +90,12 @@ const LoginPage = () => {
           <button className="btn rounded-full btn-primary text-white">
             {isPending ? "Loading..." : "Login"}
           </button>
-          {isError && <p className="text-red-500">{error.message}</p>}
         </form>
-        <div className="flex flex-col gap-2 mt-4">
-          <p className="text-white text-lg">{"Don't"} have an account?</p>
+        <div className="min-h-6 my-2 w-full text-center text-red-500">
+          {isError && error.message}
+        </div>
+        <div className="flex flex-col gap-2">
+          <p className="text-white text-lg">Don't have an account?</p>
           <Link to="/signup">
             <button className="btn rounded-full btn-primary text-white btn-outline w-full">
               Sign up

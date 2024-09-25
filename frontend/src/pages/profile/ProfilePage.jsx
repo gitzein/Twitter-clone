@@ -13,6 +13,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useFollow } from "../../hooks/useFollow";
 import { formatMemberSinceDate } from "../../utils/date";
 import toast from "react-hot-toast";
+import LoadingSpinner from "../../components/common/LoadingSpinner";
 
 const ProfilePage = () => {
   const [coverImg, setCoverImg] = useState(null);
@@ -59,7 +60,6 @@ const ProfilePage = () => {
         });
 
         const data = await res.json();
-        console.log(data);
         if (res.status === 400 || res.status === 409) {
           throw new Error(data.message);
         } else if (!res.ok) {
@@ -86,6 +86,7 @@ const ProfilePage = () => {
 
   const handleImgChange = (e, state) => {
     const file = e.target.files[0];
+
     const size = file?.size;
     if (file && size / 1024 > 5000) {
       setIsImgSizeAllowed(false);
@@ -205,10 +206,14 @@ const ProfilePage = () => {
                 {(coverImg || profileImg) && (
                   <div className="flex gap-2">
                     <button
+                      disabled={isUpdating}
                       className="btn btn-outline rounded-full btn-sm px-4"
                       onClick={() => {
-                        setProfileImg("");
-                        setCoverImg("");
+                        setProfileImg(null);
+                        setCoverImg(null);
+                        queryClient.invalidateQueries({
+                          queryKey: ["userProfile"],
+                        });
                       }}
                     >
                       Cancel
@@ -218,7 +223,7 @@ const ProfilePage = () => {
                       className="btn btn-primary rounded-full btn-sm text-white px-4"
                       onClick={handleUpdate}
                     >
-                      {isUpdating ? "Updating..." : "Update"}
+                      {isUpdating ? <LoadingSpinner size="xs" /> : "Update"}
                     </button>
                   </div>
                 )}

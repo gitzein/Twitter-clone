@@ -143,7 +143,7 @@ const updateUser = async (req, res) => {
     if (user.profileImg) {
       // https://res.cloudinary.com/dyfqon1v6/image/upload/v1712997552/zmxorcxexpdbh8r0bkjb.png
       // getting the id of img (zmxorcxexpdbh8r0bkjb)
-      const imgId = user.profileImg.split("/").pop().splt(".")[0];
+      const imgId = user.profileImg.split("/").pop().split(".")[0];
       await cloudinary.uploader.destroy(imgId);
     }
 

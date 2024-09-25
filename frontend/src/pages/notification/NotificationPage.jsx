@@ -6,6 +6,8 @@ import { FaUser } from "react-icons/fa";
 import { FaHeart } from "react-icons/fa6";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import toast from "react-hot-toast";
+import { useEffect } from "react";
+import { formatPostDate } from "../../utils/date";
 
 const NotificationPage = () => {
   const queryClient = useQueryClient();
@@ -40,7 +42,7 @@ const NotificationPage = () => {
       },
       onSuccess: () => {
         toast.success("All notifications deleted");
-        queryClient.invalidateQueries({ queryKey: ["notifications"] });
+        queryClient.invalidateQueries({ queryKey: ["notification"] });
       },
       onError: (error) => toast.error(error.message),
     }
@@ -49,6 +51,10 @@ const NotificationPage = () => {
   const deleteNotifications = () => {
     deleteAllNotifications();
   };
+
+  useEffect(() => {
+    queryClient.invalidateQueries({ queryKey: ["unreadNotif"] });
+  }, []);
 
   return (
     <>
@@ -78,15 +84,24 @@ const NotificationPage = () => {
           <div className="text-center p-4 font-bold">No notifications 🤔</div>
         )}
         {notifications?.map((notification) => (
-          <div className="border-b border-gray-700" key={notification._id}>
-            <div className="flex gap-2 p-4">
+          <div
+            className={
+              "flex justify-between border-b border-gray-700 " +
+              (notification.read == "false" && "bg-gray-800")
+            }
+            key={notification._id}
+          >
+            <div className="flex items-center gap-2 p-4">
               {notification.type === "follow" && (
                 <FaUser className="w-7 h-7 text-primary" />
               )}
               {notification.type === "like" && (
                 <FaHeart className="w-7 h-7 text-red-500" />
               )}
-              <Link to={`/profile/${notification.from.username}`}>
+              <Link
+                className="flex items-center gap-2"
+                to={`/profile/${notification.from.username}`}
+              >
                 <div className="avatar">
                   <div className="w-8 rounded-full">
                     <img
@@ -97,7 +112,7 @@ const NotificationPage = () => {
                     />
                   </div>
                 </div>
-                <div className="flex gap-1">
+                <div className="flex items-center gap-1">
                   <span className="font-bold">
                     @{notification.from.username}
                   </span>{" "}
@@ -106,6 +121,9 @@ const NotificationPage = () => {
                     : "liked your post"}
                 </div>
               </Link>
+            </div>
+            <div className="flex items-center text-base p-2">
+              {formatPostDate(notification.createdAt)}
             </div>
           </div>
         ))}

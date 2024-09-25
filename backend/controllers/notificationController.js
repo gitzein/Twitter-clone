@@ -1,4 +1,3 @@
-const { isValidObjectId, default: mongoose } = require("mongoose");
 const Notification = require("../models/Notification");
 
 const getAllNotification = async (req, res) => {
@@ -14,6 +13,16 @@ const getAllNotification = async (req, res) => {
   res.json(allNotification);
 };
 
+const getUnreadNotification = async (req, res) => {
+  const userId = req.user._id;
+
+  const unreadNotif = await Notification.find({ to: userId, read: false })
+    .sort({ createdAt: -1 })
+    .lean()
+    .exec();
+  res.json(unreadNotif);
+};
+
 const deleteNotification = async (req, res) => {
   const userId = req.user._id;
 
@@ -22,4 +31,8 @@ const deleteNotification = async (req, res) => {
   res.json({ message: "Notification deleted successfully" });
 };
 
-module.exports = { getAllNotification, deleteNotification };
+module.exports = {
+  getAllNotification,
+  getUnreadNotification,
+  deleteNotification,
+};

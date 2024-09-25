@@ -3,13 +3,28 @@ import XSvg from "../svgs/X";
 import { MdHomeFilled } from "react-icons/md";
 import { IoNotifications } from "react-icons/io5";
 import { FaUser } from "react-icons/fa";
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { BiLogOut } from "react-icons/bi";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import toast from "react-hot-toast";
 
 const Sidebar = () => {
   const queryClient = useQueryClient();
+
+  const { data: unreadNotif } = useQuery({
+    queryKey: ["unreadNotif"],
+    queryFn: async () => {
+      try {
+        const res = await fetch("/api/notification/unread");
+        const data = await res.json();
+        if (!res.ok) throw new Error("Something went wrong");
+        return data;
+      } catch (error) {
+        throw error;
+      }
+    },
+  });
+
   const { mutate: logout } = useMutation({
     mutationFn: async () => {
       try {
@@ -50,14 +65,23 @@ const Sidebar = () => {
               <span className="text-lg hidden md:block">Home</span>
             </Link>
           </li>
-          <li className="flex justify-center md:justify-start">
+          <li className="flex justify-center md:justify-between items-center">
             <Link
               to="/notifications"
               className="flex gap-3 items-center hover:bg-stone-900 transition-all rounded-full duration-300 py-2 pl-2 pr-4 max-w-fit cursor-pointer"
             >
-              <IoNotifications className="w-6 h-6" />
+              <IoNotifications
+                className={
+                  "w-6 h-6 " + (unreadNotif?.length !== 0 && "fill-primary")
+                }
+              />
               <span className="text-lg hidden md:block">Notifications</span>
             </Link>
+            {unreadNotif && unreadNotif.length !== 0 && (
+              <span className="text-base text-center hidden md:block px-2 mx-auto rounded-full bg-primary text-white">
+                {unreadNotif.length}
+              </span>
+            )}
           </li>
 
           <li className="flex justify-center md:justify-start">
@@ -87,13 +111,15 @@ const Sidebar = () => {
                 </p>
                 <p className="text-slate-500 text-sm">@{authUser?.username}</p>
               </div>
-              <BiLogOut
-                className="w-5 h-5 cursor-pointer"
-                onClick={(e) => {
-                  e.preventDefault();
-                  logout();
-                }}
-              />
+              <div className="flex items-center">
+                <BiLogOut
+                  className="w-5 h-5 cursor-pointer"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    logout();
+                  }}
+                />
+              </div>
             </div>
           </Link>
         )}

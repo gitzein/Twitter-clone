@@ -97,7 +97,6 @@ const Post = ({ post }) => {
     },
     onError: (error) => {
       toast.error(error.message);
-      console.log(error);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["posts"] });

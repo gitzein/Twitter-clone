@@ -45,12 +45,13 @@ const EditProfileModal = ({ authUser }) => {
       }
     },
     onSuccess: (updatedData) => {
-      Promise.all([
-        queryClient.invalidateQueries({ queryKey: ["userProfile"] }),
-        queryClient.invalidateQueries({ queryKey: ["authUser"] }),
-      ]);
+      queryClient.invalidateQueries({ queryKey: ["authUser"] });
+      if (authUser.username !== updatedData.username) {
+        navigate(`/profile/${updatedData.username}`);
+      } else {
+        queryClient.invalidateQueries({ queryKey: ["userProfile"] });
+      }
       toast.success("Updated");
-      navigate(`/profile/${updatedData.username}`);
     },
   });
 
@@ -102,13 +103,7 @@ const EditProfileModal = ({ authUser }) => {
       <dialog id="edit_profile_modal" className="modal">
         <div className="modal-box border rounded-md border-gray-700 shadow-md">
           <h3 className="font-bold text-lg my-3">Update Profile</h3>
-          <form
-            className="flex flex-col gap-4"
-            onSubmit={(e) => {
-              e.preventDefault();
-              alert("Profile updated successfully");
-            }}
-          >
+          <form className="flex flex-col gap-4" onSubmit={handleSubmit}>
             <div className="flex flex-wrap gap-2">
               <input
                 type="text"
@@ -178,7 +173,6 @@ const EditProfileModal = ({ authUser }) => {
               <div className="text-red-500 mx-auto">{error?.message}</div>
             )} */}
             <button
-              onClick={handleSubmit}
               disabled={currPwErr}
               className={
                 "btn rounded-full btn-sm text-white " +
