@@ -27,21 +27,29 @@ const ProfilePage = () => {
   const coverImgRef = useRef(null);
   const profileImgRef = useRef(null);
 
+  let postCount = 0;
+
   const { data: authUser } = useQuery({ queryKey: ["authUser"] });
-  const { data: posts } = useQuery({ queryKey: ["posts"] });
+  const { data: posts } = useQuery({ queryKey: ["posts", "posts"] });
 
   const {
     data: user,
     isLoading,
     refetch,
     isRefetching,
+    isError,
+    error,
   } = useQuery({
-    queryKey: ["userProfile"],
+    queryKey: ["userProfile", username],
     queryFn: async () => {
       try {
         const res = await fetch(`/api/users/profile/${username}`);
         const data = await res.json();
-        if (!res.ok) throw new Error(data.message || "Something went wrong");
+        if (res.status === 400) {
+          throw new Error(data.message || "Something went wrong");
+        } else if (!res.ok) {
+          throw new Error("Something went wrong");
+        }
         return data;
       } catch (error) {
         throw error;
@@ -49,6 +57,14 @@ const ProfilePage = () => {
     },
     retry: false,
   });
+
+  if (isError) {
+    toast.error(error.message);
+  }
+
+  if (posts) {
+    postCount = posts.length;
+  }
 
   const { mutate: updateProfileImg, isPending: isUpdating } = useMutation({
     mutationFn: async ({ coverImg, profileImg }) => {
@@ -134,7 +150,7 @@ const ProfilePage = () => {
                 <div className="flex flex-col">
                   <p className="font-bold text-lg">{user?.fullName}</p>
                   <span className="text-sm text-slate-500">
-                    {posts?.length} posts
+                    {postCount} posts
                   </span>
                 </div>
               </div>
@@ -262,23 +278,30 @@ const ProfilePage = () => {
                   </div>
                 </div>
                 <div className="flex gap-2">
-                  <div className="flex gap-1 items-center">
-                    <span className="font-bold text-xs">
-                      {user?.following.length}
-                    </span>
-                    <span className="text-slate-500 text-xs">Following</span>
-                  </div>
-                  <div className="flex gap-1 items-center">
-                    <span className="font-bold text-xs">
-                      {user?.followers.length}
-                    </span>
-                    <span className="text-slate-500 text-xs">Followers</span>
-                  </div>
+                  <Link to={`/following/${user.username}`}>
+                    <div className="flex gap-1 items-center">
+                      <span className="font-bold text-xs">
+                        {user?.following.length}
+                      </span>
+                      <span className="text-slate-500 text-xs">Following</span>
+                    </div>
+                  </Link>
+                  <Link to={`/followers/${user.username}`}>
+                    <div className="flex gap-1 items-center">
+                      <span className="font-bold text-xs">
+                        {user?.followers.length}
+                      </span>
+                      <span className="text-slate-500 text-xs">Followers</span>
+                    </div>
+                  </Link>
                 </div>
               </div>
               <div className="flex w-full border-b border-gray-700 mt-4">
                 <div
-                  className="flex justify-center flex-1 p-3 hover:bg-secondary transition duration-300 relative cursor-pointer"
+                  className={
+                    "flex justify-center flex-1 p-3 hover:bg-secondary transition duration-300 relative cursor-pointer " +
+                    (feedType !== "posts" && "text-slate-500")
+                  }
                   onClick={() => setFeedType("posts")}
                 >
                   Posts
@@ -287,7 +310,10 @@ const ProfilePage = () => {
                   )}
                 </div>
                 <div
-                  className="flex justify-center flex-1 p-3 text-slate-500 hover:bg-secondary transition duration-300 relative cursor-pointer"
+                  className={
+                    "flex justify-center flex-1 p-3 hover:bg-secondary transition duration-300 relative cursor-pointer " +
+                    (feedType !== "likes" && "text-slate-500")
+                  }
                   onClick={() => setFeedType("likes")}
                 >
                   Likes

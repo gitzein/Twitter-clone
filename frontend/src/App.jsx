@@ -8,6 +8,7 @@ import { useQuery } from "@tanstack/react-query";
 import LoadingSpinner from "./components/common/LoadingSpinner";
 import SignUpPage from "./pages/auth/signup/SignUpPage";
 import Layout from "./components/common/Layout";
+import FollowingPage from "./pages/profile/FollowingPage";
 
 function App() {
   const { data: authUser, isLoading } = useQuery({
@@ -19,7 +20,7 @@ function App() {
         const data = await res.json();
         if (data.message === "Unauthorized") return null;
         if (!res.ok) {
-          throw new Error(data.message || "Something went wrong");
+          throw new Error("Something went wrong");
         }
         return data;
       } catch (error) {
@@ -42,17 +43,25 @@ function App() {
       {/* Common component, bc it's not wrapped with Routes */}
       <Routes>
         <Route
-          path="/login"
+          path="login"
           element={!authUser ? <LoginPage /> : <Navigate to="/" />}
         />
         <Route
-          path="/signup"
+          path="signup"
           element={!authUser ? <SignUpPage /> : <Navigate to="/" />}
         />
         <Route element={authUser ? <Layout /> : <Navigate to="/login" />}>
           <Route path="/" element={<HomePage />} />
-          <Route path="/notifications" element={<NotificationPage />} />
-          <Route path="/profile/:username" element={<ProfilePage />} />
+          <Route path="notifications" element={<NotificationPage />} />
+          <Route path="profile/:username" element={<ProfilePage />} />
+          <Route
+            path="following/:username"
+            element={<FollowingPage followType={"following"} />}
+          />
+          <Route
+            path="followers/:username"
+            element={<FollowingPage followType={"followers"} />}
+          />
         </Route>
       </Routes>
       <Toaster />

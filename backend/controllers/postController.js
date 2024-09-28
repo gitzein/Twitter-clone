@@ -153,6 +153,34 @@ const getUserPosts = async (req, res) => {
   res.json(userPosts);
 };
 
+const updatePost = async (req, res) => {
+  const postId = req.params.id;
+  const text = req.body.text;
+
+  const post = await Post.findById(postId).exec();
+
+  if (!post) return res.status(400).json({ message: "Post not found" });
+
+  if (post.user.toString() !== req.user._id.toString())
+    return res.status(401).json({ message: "Unauthorized" });
+
+  post.text = text;
+  post.isEdited = true;
+
+  await post.save();
+
+  res.json(post);
+};
+
+const getSinglePost = async (req, res) => {
+  const postId = req.params.id;
+
+  const post = await Post.findById(postId).lean().exec();
+
+  if (!post) return res.status(400).json({ message: "Post not found" });
+  res.json(post);
+};
+
 module.exports = {
   createPost,
   likeOrUnlikePost,
@@ -162,4 +190,6 @@ module.exports = {
   getLikedPosts,
   getFollowingPosts,
   getUserPosts,
+  updatePost,
+  getSinglePost,
 };

@@ -1,6 +1,6 @@
-import { Link, useNavigate } from "react-router-dom";
-import { useContext, useEffect, useState } from "react";
-import { useMutation } from "@tanstack/react-query";
+import { Link } from "react-router-dom";
+import { useState } from "react";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 import XSvg from "../../../components/svgs/X";
 

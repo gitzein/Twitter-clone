@@ -34,10 +34,10 @@ const Sidebar = () => {
         const data = await res.json();
 
         if (!res.ok) {
-          throw new Error(data.error || "Something went wrong");
+          throw new Error("Something went wrong");
         }
       } catch (error) {
-        throw new Error(error);
+        throw error;
       }
     },
     onSuccess: () => {
@@ -59,7 +59,7 @@ const Sidebar = () => {
           <li className="flex justify-center md:justify-start">
             <Link
               to="/"
-              className="flex gap-3 items-center hover:bg-stone-900 transition-all rounded-full duration-300 py-2 pl-2 pr-4 max-w-fit cursor-pointer"
+              className="flex gap-3 justify-center items-center hover:bg-stone-900 transition-all rounded-full duration-300 py-2 px-2 md:pl-2 md:pr-4 max-w-fit cursor-pointer"
             >
               <MdHomeFilled className="w-8 h-8" />
               <span className="text-lg hidden md:block">Home</span>
@@ -68,7 +68,7 @@ const Sidebar = () => {
           <li className="flex justify-center md:justify-between items-center">
             <Link
               to="/notifications"
-              className="flex gap-3 items-center hover:bg-stone-900 transition-all rounded-full duration-300 py-2 pl-2 pr-4 max-w-fit cursor-pointer"
+              className="flex gap-3 items-center hover:bg-stone-900 transition-all rounded-full duration-300 py-2 px-2 md:pl-2 md:pr-4  max-w-fit cursor-pointer"
             >
               <IoNotifications
                 className={
@@ -87,7 +87,7 @@ const Sidebar = () => {
           <li className="flex justify-center md:justify-start">
             <Link
               to={`/profile/${authUser?.username}`}
-              className="flex gap-3 items-center hover:bg-stone-900 transition-all rounded-full duration-300 py-2 pl-2 pr-4 max-w-fit cursor-pointer"
+              className="flex gap-3 items-center hover:bg-stone-900 transition-all rounded-full duration-300 py-2 px-2 md:pl-2 md:pr-4  max-w-fit cursor-pointer"
             >
               <FaUser className="w-6 h-6" />
               <span className="text-lg hidden md:block">Profile</span>
@@ -95,33 +95,39 @@ const Sidebar = () => {
           </li>
         </ul>
         {authUser && (
-          <Link
-            to={`/profile/${authUser.username}`}
-            className="mt-auto mb-10 flex gap-2 items-start transition-all duration-300 hover:bg-[#181818] py-2 px-4 rounded-full"
-          >
-            <div className="avatar hidden md:inline-flex">
-              <div className="w-8 rounded-full">
-                <img src={authUser?.profileImg || "/avatar-placeholder.png"} />
+          <div className="mt-auto mb-10 flex gap-2 flex-col items-center md:flex-row  justify-center transition-all duration-300 md:hover:bg-[#181818] py-2 px-4 rounded-full">
+            <Link
+              to={`/profile/${authUser.username}`}
+              className="flex  gap-1 pl-1 pr-2.5 items-center w-full justify-center transition-all duration-300 rounded-full hover:bg-primary hover:text-white"
+            >
+              <div className="avatar hidden md:inline-flex">
+                <div className="w-8 rounded-full">
+                  <img
+                    src={authUser?.profileImg || "/avatar-placeholder.png"}
+                  />
+                </div>
               </div>
+              <div className="flex justify-between items-center text-sm ">
+                <div className="hidden md:block max-w-24">
+                  <p className="text-white font-bold truncate">
+                    {authUser?.fullName}
+                  </p>
+                  <p className="text-slate-500 truncate">
+                    @{authUser?.username}
+                  </p>
+                </div>
+              </div>
+            </Link>
+            <div className="flex justify-center items-center p-2 rounded-full transition-all duration-300 hover:bg-primary">
+              <BiLogOut
+                className="text-2xl cursor-pointer"
+                onClick={(e) => {
+                  e.preventDefault();
+                  logout();
+                }}
+              />
             </div>
-            <div className="flex justify-between flex-1">
-              <div className="hidden md:block">
-                <p className="text-white font-bold text-sm w-20 truncate">
-                  {authUser?.fullName}
-                </p>
-                <p className="text-slate-500 text-sm">@{authUser?.username}</p>
-              </div>
-              <div className="flex items-center">
-                <BiLogOut
-                  className="w-5 h-5 cursor-pointer"
-                  onClick={(e) => {
-                    e.preventDefault();
-                    logout();
-                  }}
-                />
-              </div>
-            </div>
-          </Link>
+          </div>
         )}
       </div>
     </div>

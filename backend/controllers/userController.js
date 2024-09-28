@@ -44,7 +44,7 @@ const followOrUnfollowUser = async (req, res) => {
 
     await user.save();
     await targetedUser.save();
-    return res.status(200).json({ message: "Unfollowed" });
+    return res.json({ message: "Unfollowed" });
   } else {
     // Follow
     user.following.push(targetId);
@@ -67,22 +67,19 @@ const getSuggestedUser = async (req, res) => {
   const userId = req.user._id;
 
   const followedUsers = req.user.following;
+  const idsToExclude = [userId, ...followedUsers];
 
   const users = await User.aggregate([
     {
       $match: {
-        _id: { $ne: userId },
+        _id: { $nin: idsToExclude },
       },
     },
     { $sample: { size: 10 } },
+    { $project: { password: 0 } },
   ]);
-  // $ne = not equivalent
 
-  const suggestedUsers = users
-    .filter((user) => !followedUsers.includes(user._id))
-    .slice(0, 4);
-
-  suggestedUsers.forEach((user) => (user.password = null));
+  const suggestedUsers = users.slice(0, 4);
 
   res.status(200).json(suggestedUsers);
 };
@@ -174,9 +171,53 @@ const updateUser = async (req, res) => {
   return res.json(user);
 };
 
+const getUserFollowing = async (req, res) => {
+  const { username } = req.params;
+
+  const user =
+    username === req.user.username
+      ? req.user
+      : await User.findOne({ username }).lean().exec();
+  if (!user) return res.status(404).json({ message: "User not found" });
+
+  const followingIds = user.following;
+
+  const userFollowing = await User.find(
+    { _id: followingIds },
+    "username fullName profileImg"
+  )
+    .lean()
+    .exec();
+
+  res.json(userFollowing);
+};
+
+const getUserFollowers = async (req, res) => {
+  const { username } = req.params;
+
+  const user =
+    username === req.user.username
+      ? req.user
+      : await User.findOne({ username }).lean().exec();
+  if (!user) return res.status(404).json({ message: "User not found" });
+
+  const followersIds = user.followers;
+
+  const userFollowers = await User.find(
+    { _id: followersIds },
+    "username fullName profileImg"
+  )
+    .lean()
+    .exec();
+
+  res.json(userFollowers);
+};
+
 module.exports = {
   getUserProfile,
   followOrUnfollowUser,
   getSuggestedUser,
   updateUser,
+  getUserFollowing,
+  getUserFollowers,
 };

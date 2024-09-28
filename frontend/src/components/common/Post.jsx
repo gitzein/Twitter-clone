@@ -4,12 +4,15 @@ import { FaRegHeart } from "react-icons/fa";
 import { FaHeart } from "react-icons/fa6";
 import { FaRegBookmark } from "react-icons/fa6";
 import { FaTrash } from "react-icons/fa";
+import { FaWrench } from "react-icons/fa";
+import { BsThreeDots } from "react-icons/bs";
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import toast from "react-hot-toast";
 import LoadingSpinner from "./LoadingSpinner";
 import { formatPostDate } from "../../utils/date";
+import EditPostModal from "./EditPostModal";
 
 const Post = ({ post }) => {
   const [comment, setComment] = useState("");
@@ -34,7 +37,11 @@ const Post = ({ post }) => {
           method: "DELETE",
         });
         const data = await res.json();
-        if (!res.ok) throw new Error(data.message || "Something went wrong");
+        if (res.status === 400 || res.status === 401) {
+          throw new Error(data.message || "Something went wrong");
+        } else if (!res.ok) {
+          throw new Error("Something went wrong");
+        }
         return data;
       } catch (error) {
         throw new Error(error);
@@ -54,19 +61,23 @@ const Post = ({ post }) => {
           method: "POST",
         });
         const data = await res.json();
-        if (!res.ok) throw new Error(data.message || "Something went wrong");
+        if (res.status === 400) {
+          throw new Error(data.message || "Something went wrong");
+        } else if (!res.ok) {
+          throw new Error("Something went wrong");
+        }
         return data;
       } catch (error) {
         throw error;
       }
     },
-    onError: (error) => toast.error(error),
+    onError: () => toast.error("Something went wrong"),
     onSuccess: (updatedLikes) =>
       // this is not the best UX, bc it will refetch all posts
       // queryClient.invalidateQueries({ queryKey: ["posts"] });
 
       // instead, update the cache directly for that post
-      queryClient.setQueryData(["posts"], (oldData) => {
+      queryClient.setQueryData(["posts", "forYou"], (oldData) => {
         return oldData.map((oldPost) => {
           if (oldPost._id === postId) {
             return { ...oldPost, likes: updatedLikes };
@@ -142,16 +153,47 @@ const Post = ({ post }) => {
               </Link>
               <span>·</span>
               <span>{formattedDate}</span>
+              {post.isEdited && (
+                <>
+                  <span>·</span>
+                  <span className="flex items-center gap-1">
+                    <span>Edited</span>
+                    <FaWrench className="text-xs" />
+                  </span>
+                </>
+              )}
             </span>
             {isMyPost && (
               <span className="flex justify-end flex-1">
                 {isDeleting ? (
                   <LoadingSpinner size="sm" />
                 ) : (
-                  <FaTrash
-                    className="cursor-pointer hover:text-red-500"
-                    onClick={handleDeletePost}
-                  />
+                  <div className="dropdown">
+                    <div tabIndex={0} role="button">
+                      <BsThreeDots />
+                    </div>
+                    <ul
+                      tabIndex={0}
+                      className="dropdown-content z-[1] p-0 menu shadow bg-base-100 rounded-box w-fit"
+                    >
+                      <li className="w-full">
+                        <a>
+                          <EditPostModal postId={postId} text={post.text} />
+                        </a>
+                      </li>
+                      <li>
+                        <a>
+                          <div
+                            onClick={handleDeletePost}
+                            className="flex items-center gap-2 cursor-pointer hover:text-red-500"
+                          >
+                            <FaTrash />
+                            <p className=" text-nowrap">Delete post</p>
+                          </div>
+                        </a>
+                      </li>
+                    </ul>
+                  </div>
                 )}
               </span>
             )}

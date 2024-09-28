@@ -6,7 +6,6 @@ import XSvg from "../../../components/svgs/X";
 import { MdOutlineMail } from "react-icons/md";
 import { MdPassword } from "react-icons/md";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import toast from "react-hot-toast";
 
 const LoginPage = () => {
   const [formData, setFormData] = useState({
@@ -33,8 +32,10 @@ const LoginPage = () => {
 
         const data = await res.json();
 
-        if (!res.ok) {
-          throw new Error(data.message || "Something went wrong");
+        if (res.status === 400) {
+          throw new Error(data.message);
+        } else if (!res.ok) {
+          throw new Error("Something went wrong");
         }
       } catch (error) {
         throw error;
@@ -91,7 +92,7 @@ const LoginPage = () => {
             {isPending ? "Loading..." : "Login"}
           </button>
         </form>
-        <div className="min-h-6 my-2 w-full text-center text-red-500">
+        <div className="min-h-6 my-2 w-full text-center text-sm text-red-500">
           {isError && error.message}
         </div>
         <div className="flex flex-col gap-2">
