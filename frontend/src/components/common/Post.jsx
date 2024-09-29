@@ -8,15 +8,17 @@ import { FaWrench } from "react-icons/fa";
 import { BsThreeDots } from "react-icons/bs";
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import toast from "react-hot-toast";
+import { useQuery } from "@tanstack/react-query";
 import LoadingSpinner from "./LoadingSpinner";
 import { formatPostDate } from "../../utils/date";
 import EditPostModal from "./EditPostModal";
+import { useLikePost } from "../../hooks/useLikePost";
+import { usePostComment } from "../../hooks/usePostComment";
+import { useDeletePost } from "../../hooks/useDeletePost";
+import Comment from "./Comment";
 
-const Post = ({ post }) => {
+const Post = ({ post, feedType }) => {
   const [comment, setComment] = useState("");
-  const queryClient = useQueryClient();
   const postOwner = post.user;
   const postId = post._id;
   const { data: authUser } = useQuery({ queryKey: ["authUser"] });
@@ -24,100 +26,15 @@ const Post = ({ post }) => {
 
   const isMyPost = post.user._id === authUser._id;
 
-  const formattedDate = formatPostDate(post.createdAt);
+  const formattedPostDate = formatPostDate(post.createdAt);
 
-  const {
-    mutate: deleteMutation,
-    isPending: isDeleting,
-    error,
-  } = useMutation({
-    mutationFn: async () => {
-      try {
-        const res = await fetch(`/api/posts/delete/${postId}`, {
-          method: "DELETE",
-        });
-        const data = await res.json();
-        if (res.status === 400 || res.status === 401) {
-          throw new Error(data.message || "Something went wrong");
-        } else if (!res.ok) {
-          throw new Error("Something went wrong");
-        }
-        return data;
-      } catch (error) {
-        throw new Error(error);
-      }
-    },
-    onSuccess: () => {
-      toast.success("Post deleted");
-      queryClient.invalidateQueries({ queryKey: ["posts"] });
-    },
-    onError: () => toast.error(error.message),
-  });
-
-  const { mutate: likePost, isPending: likingPending } = useMutation({
-    mutationFn: async (postId) => {
-      try {
-        const res = await fetch(`/api/posts/like/${postId}`, {
-          method: "POST",
-        });
-        const data = await res.json();
-        if (res.status === 400) {
-          throw new Error(data.message || "Something went wrong");
-        } else if (!res.ok) {
-          throw new Error("Something went wrong");
-        }
-        return data;
-      } catch (error) {
-        throw error;
-      }
-    },
-    onError: () => toast.error("Something went wrong"),
-    onSuccess: (updatedLikes) =>
-      // this is not the best UX, bc it will refetch all posts
-      // queryClient.invalidateQueries({ queryKey: ["posts"] });
-
-      // instead, update the cache directly for that post
-      queryClient.setQueryData(["posts", "forYou"], (oldData) => {
-        return oldData.map((oldPost) => {
-          if (oldPost._id === postId) {
-            return { ...oldPost, likes: updatedLikes };
-          }
-          return oldPost;
-        });
-      }),
-  });
-
-  const { mutate: postComment, isPending: isCommenting } = useMutation({
-    mutationFn: async (text) => {
-      try {
-        const res = await fetch(`/api/posts/comment/${postId}`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ text }),
-        });
-        const data = await res.json();
-        if (res.status === 400) {
-          throw new Error(data.message || "Something went wrong");
-        } else if (!res.ok) {
-          throw new Error("Something went wrong");
-        }
-        return data;
-      } catch (error) {
-        throw new Error(error);
-      }
-    },
-    onError: (error) => {
-      toast.error(error.message);
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["posts"] });
-      toast.success("Comment posted");
-    },
-  });
+  const { deletePost, isDeleting } = useDeletePost(postId, feedType);
 
   const handleDeletePost = () => {
-    deleteMutation();
+    deletePost();
   };
+
+  const { postComment, isCommenting } = usePostComment(postId, feedType);
 
   const handlePostComment = (e) => {
     e.preventDefault();
@@ -125,6 +42,8 @@ const Post = ({ post }) => {
     postComment(comment);
     setComment("");
   };
+
+  const { likePost, likingPending } = useLikePost(postId, "posts", feedType);
 
   const handleLikePost = () => {
     if (likingPending) return;
@@ -134,25 +53,24 @@ const Post = ({ post }) => {
   return (
     <>
       <div className="flex gap-2 items-start p-4 border-b border-gray-700">
-        <div className="avatar">
-          <Link
-            to={`/profile/${postOwner.username}`}
-            className="w-8 rounded-full overflow-hidden"
-          >
-            <img src={postOwner.profileImg || "/avatar-placeholder.png"} />
-          </Link>
-        </div>
+        <Link to={`/profile/${postOwner.username}`}>
+          <div className="avatar">
+            <div className="w-8 rounded-full overflow-hidden">
+              <img src={postOwner.profileImg || "/avatar-placeholder.png"} />
+            </div>
+          </div>
+        </Link>
         <div className="flex flex-col flex-1">
-          <div className="flex gap-2 items-center">
+          <div className="flex gap-1 items-center">
             <Link to={`/profile/${postOwner.username}`} className="font-bold">
               {postOwner.fullName}
             </Link>
-            <span className="text-gray-700 flex gap-1 text-sm">
+            <span className="text-gray-700 flex items-center gap-1 text-sm">
               <Link to={`/profile/${postOwner.username}`}>
                 @{postOwner.username}
               </Link>
               <span>·</span>
-              <span>{formattedDate}</span>
+              <span>{formattedPostDate}</span>
               {post.isEdited && (
                 <>
                   <span>·</span>
@@ -168,7 +86,7 @@ const Post = ({ post }) => {
                 {isDeleting ? (
                   <LoadingSpinner size="sm" />
                 ) : (
-                  <div className="dropdown">
+                  <div className="dropdown dropdown-end">
                     <div tabIndex={0} role="button">
                       <BsThreeDots />
                     </div>
@@ -178,7 +96,12 @@ const Post = ({ post }) => {
                     >
                       <li className="w-full">
                         <a>
-                          <EditPostModal postId={postId} text={post.text} />
+                          <EditPostModal
+                            id={postId}
+                            text={post.text}
+                            feedType={feedType}
+                            editType={"post"}
+                          />
                         </a>
                       </li>
                       <li>
@@ -198,22 +121,26 @@ const Post = ({ post }) => {
               </span>
             )}
           </div>
-          <div className="flex flex-col gap-3 overflow-hidden">
-            <span>{post.text}</span>
-            {post.img && (
-              <img
-                src={post.img}
-                className="h-80 object-contain rounded-lg border border-gray-700"
-                alt=""
-              />
-            )}
-          </div>
+          <Link to={`/post/${post._id}`}>
+            <div className="flex flex-col gap-3 overflow-hidden">
+              <span>{post.text}</span>
+              {post.img && (
+                <img
+                  src={post.img}
+                  className="h-80 object-contain rounded-lg border border-gray-700"
+                  alt=""
+                />
+              )}
+            </div>
+          </Link>
           <div className="flex justify-between mt-3">
             <div className="flex gap-4 items-center w-2/3 justify-between">
               <div
                 className="flex gap-1 items-center cursor-pointer group"
                 onClick={() =>
-                  document.getElementById("comments_modal" + postId).showModal()
+                  document
+                    .getElementById("comments_modal_" + postId)
+                    .showModal()
                 }
               >
                 <FaRegComment className="w-4 h-4  text-slate-500 group-hover:text-sky-400" />
@@ -223,7 +150,7 @@ const Post = ({ post }) => {
               </div>
               {/* We're using Modal Component from DaisyUI */}
               <dialog
-                id={`comments_modal${postId}`}
+                id={`comments_modal_${postId}`}
                 className="modal border-none outline-none"
               >
                 <div className="modal-box rounded border border-gray-600">
@@ -236,27 +163,7 @@ const Post = ({ post }) => {
                     )}
                     {post.comments.map((comment) => (
                       <div key={comment._id} className="flex gap-2 items-start">
-                        <div className="avatar">
-                          <div className="w-8 rounded-full">
-                            <img
-                              src={
-                                comment.user.profileImg ||
-                                "/avatar-placeholder.png"
-                              }
-                            />
-                          </div>
-                        </div>
-                        <div className="flex flex-col">
-                          <div className="flex items-center gap-1">
-                            <span className="font-bold">
-                              {comment.user.fullName}
-                            </span>
-                            <span className="text-gray-700 text-sm">
-                              @{comment.user.username}
-                            </span>
-                          </div>
-                          <div className="text-sm">{comment.text}</div>
-                        </div>
+                        <Comment comment={comment} feedType={feedType} />
                       </div>
                     ))}
                   </div>

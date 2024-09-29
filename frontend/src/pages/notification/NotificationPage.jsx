@@ -4,6 +4,7 @@ import LoadingSpinner from "../../components/common/LoadingSpinner";
 import { IoSettingsOutline } from "react-icons/io5";
 import { FaUser } from "react-icons/fa";
 import { FaHeart } from "react-icons/fa6";
+import { FaCommentDots } from "react-icons/fa6";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import toast from "react-hot-toast";
 import { useEffect } from "react";
@@ -81,50 +82,61 @@ const NotificationPage = () => {
           </div>
         )}
         {notifications?.length === 0 && (
-          <div className="text-center p-4 font-bold">No notifications 🤔</div>
+          <div className="text-center p-4 font-bold">No notifications</div>
         )}
         {notifications?.map((notification) => (
           <div
             className={
-              "flex justify-between border-b border-gray-700 " +
+              "border-b border-gray-700 " +
               (notification.read == "false" && "bg-gray-800")
             }
             key={notification._id}
           >
-            <div className="flex items-center gap-2 p-4">
-              {notification.type === "follow" && (
-                <FaUser className="w-7 h-7 text-primary" />
-              )}
-              {notification.type === "like" && (
-                <FaHeart className="w-7 h-7 text-red-500" />
-              )}
-              <Link
-                className="flex items-center gap-2"
-                to={`/profile/${notification.from.username}`}
-              >
-                <div className="avatar">
-                  <div className="w-8 rounded-full">
-                    <img
-                      src={
-                        notification.from.profileImg ||
-                        "/avatar-placeholder.png"
-                      }
-                    />
+            <Link
+              className="w-full flex justify-between hover:bg-secondary"
+              to={`/profile/${notification.from.username}`}
+            >
+              <div className="flex items-center gap-2 p-4">
+                {notification.type === "follow" && (
+                  <FaUser className="w-7 h-7" />
+                )}
+                {notification.type === "like" && (
+                  <FaHeart className="w-7 h-7 text-red-500" />
+                )}
+                {notification.type === "likeComment" && (
+                  <FaHeart className="w-7 h-7 text-red-500" />
+                )}
+                {notification.type === "comment" && (
+                  <FaCommentDots className="w-7 h-7 text-sky-500" />
+                )}
+                <div className="flex items-center gap-2">
+                  <div className="avatar">
+                    <div className="w-8 rounded-full">
+                      <img
+                        src={
+                          notification.from.profileImg ||
+                          "/avatar-placeholder.png"
+                        }
+                      />
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-1">
+                    <span className="font-bold">
+                      @{notification.from.username}
+                    </span>{" "}
+                    {notification.type === "follow" && "followed you"}
+                    {notification.type === "like" && "liked your post"}
+                    {notification.type === "likeComment" &&
+                      "liked your comment"}
+                    {notification.type === "comment" &&
+                      "commented on your post"}
                   </div>
                 </div>
-                <div className="flex items-center gap-1">
-                  <span className="font-bold">
-                    @{notification.from.username}
-                  </span>{" "}
-                  {notification.type === "follow"
-                    ? "followed you"
-                    : "liked your post"}
-                </div>
-              </Link>
-            </div>
-            <div className="flex items-center text-base p-2">
-              {formatPostDate(notification.createdAt)}
-            </div>
+              </div>
+              <div className="flex items-center text-base p-2">
+                {formatPostDate(notification.createdAt)}
+              </div>
+            </Link>
           </div>
         ))}
       </div>

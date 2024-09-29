@@ -1,6 +1,7 @@
 const Notification = require("../models/Notification");
 const Post = require("../models/Post");
 const User = require("../models/User");
+const Comment = require("../models/Comment");
 const { v2: cloudinary } = require("cloudinary");
 
 const createPost = async (req, res) => {
@@ -60,6 +61,7 @@ const commentPost = async (req, res) => {
   const userId = req.user._id;
   const postId = req.params.id;
   const { text } = req.body;
+  let { img } = req.body;
 
   if (!text)
     return res.status(400).json({ message: "Comment cannot be empty text" });
@@ -68,14 +70,23 @@ const commentPost = async (req, res) => {
 
   if (!post) return res.status(400).json({ message: "Post doesn't exist" });
 
-  const commentObj = {
-    text,
-    user: userId,
-  };
+  const newComment = new Comment({ from: userId, to: postId, img, text });
 
-  post.comments.push(commentObj);
+  await newComment.save();
 
-  post.save();
+  if (newComment?._id) {
+    post.comments.push(newComment?._id);
+    await post.save();
+    if (userId.toString() !== post.user.toString()) {
+      const notification = new Notification({
+        from: userId,
+        to: post.user,
+        type: "comment",
+      });
+      await notification.save();
+    }
+  }
+
   res.json(post.comments);
 };
 
@@ -101,8 +112,14 @@ const deletePost = async (req, res) => {
 const getAllPosts = async (req, res) => {
   const posts = await Post.find()
     .sort({ createdAt: -1 })
-    .populate({ path: "user", select: "-password, -email" })
-    .populate({ path: "comments.user", select: "-password, -email" })
+    .populate({ path: "user", select: "-password -email" })
+    .populate({
+      path: "comments",
+      populate: {
+        path: "from",
+        select: "username fullName profileImg _id",
+      },
+    })
     .lean()
     .exec();
   if (posts.length === 0) return res.status(204).json([]);
@@ -115,8 +132,14 @@ const getLikedPosts = async (req, res) => {
 
   const likedPosts = await Post.find({ _id: likedPostsIds })
     .sort({ createdAt: -1 })
-    .populate({ path: "user", select: "-password, -email" })
-    .populate({ path: "comments.user", select: "-password, -email" })
+    .populate({ path: "user", select: "-password -email" })
+    .populate({
+      path: "comments",
+      populate: {
+        path: "from",
+        select: "username fullName profileImg _id",
+      },
+    })
     .lean()
     .exec();
 
@@ -128,8 +151,14 @@ const getFollowingPosts = async (req, res) => {
 
   const followingPosts = await Post.find({ user: followeduser })
     .sort({ createdAt: -1 })
-    .populate({ path: "user", select: "-password, -email" })
-    .populate({ path: "comments.user", select: "-password, -email" })
+    .populate({ path: "user", select: "-password -email" })
+    .populate({
+      path: "comments",
+      populate: {
+        path: "from",
+        select: "username fullName profileImg _id",
+      },
+    })
     .lean()
     .exec();
 
@@ -145,8 +174,14 @@ const getUserPosts = async (req, res) => {
 
   const userPosts = await Post.find({ user: foundUser._id })
     .sort({ createdAt: -1 })
-    .populate({ path: "user", select: "-password, -email" })
-    .populate({ path: "comments.user", select: "-password, -email" })
+    .populate({ path: "user", select: "-password -email" })
+    .populate({
+      path: "comments",
+      populate: {
+        path: "from",
+        select: "username fullName profileImg _id",
+      },
+    })
     .lean()
     .exec();
 
@@ -175,10 +210,91 @@ const updatePost = async (req, res) => {
 const getSinglePost = async (req, res) => {
   const postId = req.params.id;
 
-  const post = await Post.findById(postId).lean().exec();
+  const post = await Post.findById(postId)
+    .populate({ path: "user", select: "-password -email" })
+    .populate({
+      path: "comments",
+      populate: {
+        path: "from",
+        select: "username fullName profileImg _id",
+      },
+    })
+    .lean()
+    .exec();
 
   if (!post) return res.status(400).json({ message: "Post not found" });
   res.json(post);
+};
+
+const editComment = async (req, res) => {
+  const userId = req.user._id;
+  const commentId = req.params.id;
+  const { text } = req.body;
+
+  const comment = await Comment.findById(commentId).exec();
+  if (!comment) return res.status(400).json({ message: "Comment not found" });
+  if (comment.from.toString() !== userId.toString())
+    return res.status(401).json({ message: "Unauthorized" });
+
+  comment.text = text;
+  comment.isEdited = true;
+  await comment.save();
+
+  const post = await Post.findById(comment.to)
+    .populate({
+      path: "comments",
+      populate: {
+        path: "from",
+        select: "username fullName profileImg _id",
+      },
+    })
+    .lean()
+    .exec();
+  if (!post) return res.status(400).json({ message: "Post no longer exist" });
+
+  res.json(post.comments);
+};
+
+const deleteComment = async (req, res) => {
+  const userId = req.user._id;
+  const commentId = req.params.id;
+
+  const comment = await Comment.findById(commentId).lean().exec();
+  if (!comment) return res.status(400).json({ message: "Comment not found" });
+  if (comment.from.toString() !== userId.toString())
+    return res.status(401).json({ message: "Unauthorized" });
+
+  await Comment.findByIdAndDelete(commentId);
+  res.json({ message: "Comment deleted" });
+};
+
+const likeComment = async (req, res) => {
+  const userId = req.user._id;
+  const commentId = req.params.id;
+
+  const comment = await Comment.findById(commentId).exec();
+  if (!comment) return res.status(400).json({ message: "Comment not found" });
+
+  const isLiked = comment.likes.indexOf(userId);
+
+  if (isLiked === -1) {
+    //like
+    comment.likes.push(userId);
+    if (userId.toString() !== commentId) {
+      const notification = new Notification({
+        from: userId,
+        to: comment.from,
+        type: "likeComment",
+      });
+      await notification.save();
+    }
+  } else {
+    //unlike
+    comment.likes.splice(isLiked, 1);
+  }
+
+  await comment.save();
+  res.json(comment.likes);
 };
 
 module.exports = {
@@ -192,4 +308,7 @@ module.exports = {
   getUserPosts,
   updatePost,
   getSinglePost,
+  editComment,
+  deleteComment,
+  likeComment,
 };

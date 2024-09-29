@@ -77,7 +77,11 @@ function FollowingPage({ followType }) {
           )}
         </div>
       </div>
-      {isLoading && <LoadingSpinner size="lg" />}
+      {isLoading && (
+        <div className="w-full flex justify-center">
+          <LoadingSpinner size="lg" />
+        </div>
+      )}
       {following?.length === 0 && (
         <div className="text-center mt-4">
           Not {followInfo === "following" ? "following" : "followed by"} anyone

@@ -21,15 +21,8 @@ const postSchema = new mongoose.Schema(
     ],
     comments: [
       {
-        text: {
-          type: String,
-          required: true,
-        },
-        user: {
-          type: mongoose.Schema.Types.ObjectId,
-          ref: "User",
-          required: true,
-        },
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Comment",
       },
     ],
     isEdited: {

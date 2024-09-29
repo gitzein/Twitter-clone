@@ -34,6 +34,8 @@ const LoginPage = () => {
 
         if (res.status === 400) {
           throw new Error(data.message);
+        } else if (res.status === 500) {
+          throw new Error("Something went wrong");
         } else if (!res.ok) {
           throw new Error("Something went wrong");
         }

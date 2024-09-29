@@ -10,8 +10,15 @@ router.get("/likes/:id", protectRoute, postController.getLikedPosts);
 router.get("/post/:id", protectRoute, postController.getSinglePost);
 router.post("/create", protectRoute, postController.createPost);
 router.post("/like/:id", protectRoute, postController.likeOrUnlikePost);
-router.post("/comment/:id", protectRoute, postController.commentPost);
 router.post("/update/:id", protectRoute, postController.updatePost);
 router.delete("/delete/:id", protectRoute, postController.deletePost);
+router.post("/comment/:id", protectRoute, postController.commentPost);
+router.post("/comment/update/:id", protectRoute, postController.editComment);
+router.delete(
+  "/comment/delete/:id",
+  protectRoute,
+  postController.deleteComment
+);
+router.post("/comment/like/:id", protectRoute, postController.likeComment);
 
 module.exports = router;
