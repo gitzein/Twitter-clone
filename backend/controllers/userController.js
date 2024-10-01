@@ -19,6 +19,10 @@ const getUserProfile = async (req, res) => {
 const followOrUnfollowUser = async (req, res) => {
   const { id: targetId } = req.params;
 
+  const isValidObjectId = mongoose.isObjectIdOrHexString(targetId);
+  if (!isValidObjectId)
+    return res.status(400).json({ message: "User not found" });
+
   const userId = req.user._id.toString();
 
   if (targetId === userId)

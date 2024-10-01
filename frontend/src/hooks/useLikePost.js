@@ -26,10 +26,6 @@ export const useLikePost = (postId, key1, key2 = "forYou") => {
       console.log(error);
     },
     onSuccess: (updatedLikes) =>
-      // this is not the best UX, bc it will refetch all posts
-      // queryClient.invalidateQueries({ queryKey: ["posts"] });
-
-      // instead, update the cache directly for that post
       queryClient.setQueryData([key1, key2], (oldData) => {
         if (key1 === "posts") {
           return oldData.map((oldPost) => {

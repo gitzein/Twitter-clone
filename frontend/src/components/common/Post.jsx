@@ -15,7 +15,7 @@ import EditPostModal from "./EditPostModal";
 import { useLikePost } from "../../hooks/useLikePost";
 import { usePostComment } from "../../hooks/usePostComment";
 import { useDeletePost } from "../../hooks/useDeletePost";
-import Comment from "./Comment";
+import AddCommentModal from "./AddCommentModal";
 
 const Post = ({ post, feedType }) => {
   const [comment, setComment] = useState("");
@@ -135,57 +135,7 @@ const Post = ({ post, feedType }) => {
           </Link>
           <div className="flex justify-between mt-3">
             <div className="flex gap-4 items-center w-2/3 justify-between">
-              <div
-                className="flex gap-1 items-center cursor-pointer group"
-                onClick={() =>
-                  document
-                    .getElementById("comments_modal_" + postId)
-                    .showModal()
-                }
-              >
-                <FaRegComment className="w-4 h-4  text-slate-500 group-hover:text-sky-400" />
-                <span className="text-sm text-slate-500 group-hover:text-sky-400">
-                  {post.comments.length}
-                </span>
-              </div>
-              {/* We're using Modal Component from DaisyUI */}
-              <dialog
-                id={`comments_modal_${postId}`}
-                className="modal border-none outline-none"
-              >
-                <div className="modal-box rounded border border-gray-600">
-                  <h3 className="font-bold text-lg mb-4">COMMENTS</h3>
-                  <div className="flex flex-col gap-3 max-h-60 overflow-auto">
-                    {post.comments.length === 0 && (
-                      <p className="text-sm text-slate-500">
-                        No comments yet 🤔 Be the first one 😉
-                      </p>
-                    )}
-                    {post.comments.map((comment) => (
-                      <div key={comment._id} className="flex gap-2 items-start">
-                        <Comment comment={comment} feedType={feedType} />
-                      </div>
-                    ))}
-                  </div>
-                  <form
-                    className="flex gap-2 items-center mt-4 border-t border-gray-600 pt-2"
-                    onSubmit={handlePostComment}
-                  >
-                    <textarea
-                      className="textarea w-full p-1 rounded text-md resize-none border focus:outline-none  border-gray-800"
-                      placeholder="Add a comment..."
-                      value={comment}
-                      onChange={(e) => setComment(e.target.value)}
-                    />
-                    <button className="btn btn-primary rounded-full btn-sm text-white px-4">
-                      {isCommenting ? <LoadingSpinner size="md" /> : "Post"}
-                    </button>
-                  </form>
-                </div>
-                <form method="dialog" className="modal-backdrop">
-                  <button className="outline-none">close</button>
-                </form>
-              </dialog>
+              <AddCommentModal post={post} feedType={feedType} />
               <div className="flex gap-1 items-center group cursor-pointer">
                 <BiRepost className="w-6 h-6  text-slate-500 group-hover:text-green-500" />
                 <span className="text-sm text-slate-500 group-hover:text-green-500">

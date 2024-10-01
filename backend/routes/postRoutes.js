@@ -14,11 +14,7 @@ router.post("/update/:id", protectRoute, postController.updatePost);
 router.delete("/delete/:id", protectRoute, postController.deletePost);
 router.post("/comment/:id", protectRoute, postController.commentPost);
 router.post("/comment/update/:id", protectRoute, postController.editComment);
-router.delete(
-  "/comment/delete/:id",
-  protectRoute,
-  postController.deleteComment
-);
+router.delete("/comment/:id", protectRoute, postController.deleteComment);
 router.post("/comment/like/:id", protectRoute, postController.likeComment);
 
 module.exports = router;

@@ -3,6 +3,7 @@ const Post = require("../models/Post");
 const User = require("../models/User");
 const Comment = require("../models/Comment");
 const { v2: cloudinary } = require("cloudinary");
+const { default: mongoose } = require("mongoose");
 
 const createPost = async (req, res) => {
   const userId = req.user._id;
@@ -27,6 +28,10 @@ const createPost = async (req, res) => {
 const likeOrUnlikePost = async (req, res) => {
   const userId = req.user._id;
   const postId = req.params.id;
+
+  const isValidObjectId = mongoose.isObjectIdOrHexString(postId);
+  if (!isValidObjectId)
+    return res.status(400).json({ message: "Post not found" });
 
   const post = await Post.findById(postId).exec();
   const user = await User.findById(userId).exec();
@@ -63,6 +68,10 @@ const commentPost = async (req, res) => {
   const { text } = req.body;
   let { img } = req.body;
 
+  const isValidObjectId = mongoose.isObjectIdOrHexString(postId);
+  if (!isValidObjectId)
+    return res.status(400).json({ message: "Post not found" });
+
   if (!text)
     return res.status(400).json({ message: "Comment cannot be empty text" });
 
@@ -94,6 +103,10 @@ const deletePost = async (req, res) => {
   const postId = req.params.id;
   const userId = req.user._id;
 
+  const isValidObjectId = mongoose.isObjectIdOrHexString(postId);
+  if (!isValidObjectId)
+    return res.status(400).json({ message: "Post not found" });
+
   const post = await Post.findById(postId).lean().exec();
   if (!post) return res.status(400).json({ message: "Post doesn't exixt" });
 
@@ -103,6 +116,10 @@ const deletePost = async (req, res) => {
   if (post.img) {
     const imgId = post.img.split("/").pop().split(".")[0];
     await cloudinary.uploader.destroy(imgId);
+  }
+
+  if (post.comments.length > 0) {
+    await Comment.deleteMany({ to: postId });
   }
 
   await Post.findByIdAndDelete(postId);
@@ -128,8 +145,16 @@ const getAllPosts = async (req, res) => {
 };
 
 const getLikedPosts = async (req, res) => {
-  const likedPostsIds = req.user.likedPosts;
+  const userId = req.params.id;
+  const isValidObjectId = mongoose.isObjectIdOrHexString(userId);
+  if (!isValidObjectId)
+    return res.status(400).json({ message: "User not found" });
 
+  const isItMe = userId === req.user._id.toString();
+
+  const user = isItMe ? req.user : await User.findById(userId).lean().exec();
+
+  const likedPostsIds = user.likedPosts;
   const likedPosts = await Post.find({ _id: likedPostsIds })
     .sort({ createdAt: -1 })
     .populate({ path: "user", select: "-password -email" })
@@ -192,6 +217,10 @@ const updatePost = async (req, res) => {
   const postId = req.params.id;
   const text = req.body.text;
 
+  const isValidObjectId = mongoose.isObjectIdOrHexString(postId);
+  if (!isValidObjectId)
+    return res.status(400).json({ message: "Post not found" });
+
   const post = await Post.findById(postId).exec();
 
   if (!post) return res.status(400).json({ message: "Post not found" });
@@ -209,6 +238,11 @@ const updatePost = async (req, res) => {
 
 const getSinglePost = async (req, res) => {
   const postId = req.params.id;
+
+  const isValidObjectId = mongoose.isObjectIdOrHexString(postId);
+
+  if (!isValidObjectId)
+    return res.status(400).json({ message: "Post not found" });
 
   const post = await Post.findById(postId)
     .populate({ path: "user", select: "-password -email" })
@@ -230,6 +264,10 @@ const editComment = async (req, res) => {
   const userId = req.user._id;
   const commentId = req.params.id;
   const { text } = req.body;
+
+  const isValidObjectId = mongoose.isObjectIdOrHexString(commentId);
+  if (!isValidObjectId)
+    return res.status(400).json({ message: "Comment not found" });
 
   const comment = await Comment.findById(commentId).exec();
   if (!comment) return res.status(400).json({ message: "Comment not found" });
@@ -259,6 +297,10 @@ const deleteComment = async (req, res) => {
   const userId = req.user._id;
   const commentId = req.params.id;
 
+  const isValidObjectId = mongoose.isObjectIdOrHexString(commentId);
+  if (!isValidObjectId)
+    return res.status(400).json({ message: "Comment not found" });
+
   const comment = await Comment.findById(commentId).lean().exec();
   if (!comment) return res.status(400).json({ message: "Comment not found" });
   if (comment.from.toString() !== userId.toString())
@@ -271,6 +313,10 @@ const deleteComment = async (req, res) => {
 const likeComment = async (req, res) => {
   const userId = req.user._id;
   const commentId = req.params.id;
+
+  const isValidObjectId = mongoose.isObjectIdOrHexString(commentId);
+  if (!isValidObjectId)
+    return res.status(400).json({ message: "Comment not found" });
 
   const comment = await Comment.findById(commentId).exec();
   if (!comment) return res.status(400).json({ message: "Comment not found" });

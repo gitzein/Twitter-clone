@@ -144,7 +144,7 @@ const ProfilePage = () => {
           {!isLoading && !isRefetching && user && (
             <>
               <div className="flex gap-10 px-4 py-2 items-center">
-                <Link to="/">
+                <Link to={-1}>
                   <FaArrowLeft className="w-4 h-4" />
                 </Link>
                 <div className="flex flex-col">
@@ -172,12 +172,14 @@ const ProfilePage = () => {
 
                 <input
                   type="file"
+                  accept="image/*"
                   hidden
                   ref={coverImgRef}
                   onChange={(e) => handleImgChange(e, "coverImg")}
                 />
                 <input
                   type="file"
+                  accept="image/*"
                   hidden
                   ref={profileImgRef}
                   onChange={(e) => handleImgChange(e, "profileImg")}

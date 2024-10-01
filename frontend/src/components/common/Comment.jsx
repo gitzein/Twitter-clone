@@ -1,19 +1,89 @@
 import React from "react";
 import { formatPostDate } from "../../utils/date";
-import { FaTrash, FaWrench } from "react-icons/fa";
+import { FaHeart, FaRegHeart, FaTrash, FaWrench } from "react-icons/fa";
 import { Link } from "react-router-dom";
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { BsThreeDots } from "react-icons/bs";
 import EditPostModal from "./EditPostModal";
+import toast from "react-hot-toast";
+import LoadingSpinner from "./LoadingSpinner";
 
 function Comment({ comment, feedType, postId }) {
   const { data: authUser } = useQuery({ queryKey: ["authUser"] });
 
   const isMyComment = authUser._id === comment.from._id;
 
-  const isDeleting = false;
+  const queryClient = useQueryClient();
 
-  const handleDeleteComment = () => {};
+  const { mutate: deleteComment, isPending: isDeleting } = useMutation({
+    mutationFn: async () => {
+      try {
+        const res = await fetch(`/api/posts/comment/${comment._id}`, {
+          method: "DELETE",
+        });
+        const data = await res.json();
+
+        if (res.status === 400 || res.status === 401) {
+          throw new Error(data.message || "Something went wrong");
+        } else if (!res.ok) {
+          throw new Error("Something went wrong");
+        }
+
+        return data;
+      } catch (error) {
+        throw error;
+      }
+    },
+    onError: (error) => toast.error(error.message),
+    onSuccess: () =>
+      queryClient.invalidateQueries({ queryKey: ["post", postId] }),
+  });
+
+  const handleDeleteComment = () => {
+    deleteComment();
+  };
+
+  const { mutate: likeComment, isPending: isLiking } = useMutation({
+    mutationFn: async () => {
+      try {
+        const res = await fetch(`/api/posts/comment/like/${comment._id}`, {
+          method: "POST",
+        });
+        const data = await res.json();
+
+        if (res.status === 400 || res.status === 401) {
+          throw new Error(data.message || "Something went wrong");
+        } else if (!res.ok) {
+          throw new Error("Something went wrong");
+        }
+
+        return data;
+      } catch (error) {
+        throw error;
+      }
+    },
+    onSuccess: (newCommentLikes) => {
+      queryClient.setQueryData(["post", postId], (oldData) => {
+        console.log(oldData, newCommentLikes);
+
+        const newCommentsArr = oldData.comments.map((oldComment) => {
+          if (oldComment._id === comment._id) {
+            return { ...oldComment, likes: newCommentLikes };
+          }
+          return oldComment;
+        });
+
+        return { ...oldData, comments: newCommentsArr };
+      });
+    },
+  });
+
+  const isLiked = comment.likes.includes(authUser._id);
+
+  const handleLikeComment = () => {
+    if (isLiking) return;
+    likeComment();
+  };
 
   return (
     <>
@@ -77,7 +147,7 @@ function Comment({ comment, feedType, postId }) {
                           className="flex items-center gap-2 cursor-pointer hover:text-red-500"
                         >
                           <FaTrash />
-                          <p className=" text-nowrap">Delete post</p>
+                          <p className=" text-nowrap">Delete comment</p>
                         </div>
                       </a>
                     </li>
@@ -87,8 +157,27 @@ function Comment({ comment, feedType, postId }) {
             </span>
           )}
         </div>
+        <div className="flex flex-1">
+          <div className="text-sm flex flex-1 py-2">{comment.text}</div>
+          <div
+            className="flex gap-1 items-center group cursor-pointer"
+            onClick={handleLikeComment}
+          >
+            {!isLiked ? (
+              <FaRegHeart className="w-4 h-4 cursor-pointer text-slate-500 group-hover:text-pink-500" />
+            ) : (
+              <FaHeart className="w-4 h-4 cursor-pointer text-pink-500 " />
+            )}
 
-        <div className="text-sm">{comment.text}</div>
+            <span
+              className={`text-sm text-slate-500 group-hover:text-pink-500 ${
+                isLiked ? "text-pink-500" : ""
+              }`}
+            >
+              {comment.likes.length}
+            </span>
+          </div>
+        </div>
       </div>
     </>
   );

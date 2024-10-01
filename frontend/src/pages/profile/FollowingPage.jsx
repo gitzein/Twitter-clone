@@ -44,7 +44,7 @@ function FollowingPage({ followType }) {
   return (
     <div className="flex-[4_4_0] justify-center border-l border-r border-gray-700 min-h-screen">
       <div className="flex gap-4 px-4 py-4 items-center">
-        <Link to="/" className="p-2">
+        <Link to={-1} className="p-2">
           <FaArrowLeft className="w-4 h-4" />
         </Link>
         <Link to={`/profile/${username}`}>
