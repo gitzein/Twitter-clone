@@ -14,6 +14,10 @@ const CreatePost = () => {
   const { data } = useQuery({ queryKey: ["authUser"] });
   const queryClient = useQueryClient();
 
+  const textLength = text.split("").length;
+  const almostReachingTextLimit = textLength >= 270 && textLength <= 280;
+  const textLimitReached = textLength > 280;
+
   const {
     mutate: createPostMutation,
     isPending,
@@ -48,7 +52,7 @@ const CreatePost = () => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-
+    if (textLimitReached) return;
     createPostMutation({ text, img });
   };
 
@@ -113,12 +117,30 @@ const CreatePost = () => {
             accept="image/*"
             onChange={handleImgChange}
           />
-          <button
-            disabled={isPending || !isImgSizeAllowed}
-            className="btn btn-primary rounded-full btn-sm text-white px-4"
-          >
-            {isPending ? "Posting..." : "Post"}
-          </button>
+          <div className="flex gap-2 items-center">
+            {textLength > 0 && (
+              <div
+                className={
+                  "opacity-70 transition-all duration-300 " +
+                  (almostReachingTextLimit
+                    ? "text-yellow-500"
+                    : textLimitReached
+                    ? "text-red-500 font-bold"
+                    : "text-gray-500")
+                }
+              >
+                {textLimitReached
+                  ? `-${textLength - 280}`
+                  : `${textLength}/280`}
+              </div>
+            )}
+            <button
+              disabled={isPending || !isImgSizeAllowed || textLimitReached}
+              className="btn btn-primary rounded-full btn-sm text-white px-4"
+            >
+              {isPending ? "Posting..." : "Post"}
+            </button>
+          </div>
         </div>
         {isError && <div className="text-red-500">{error.message}</div>}
         {!isImgSizeAllowed && (

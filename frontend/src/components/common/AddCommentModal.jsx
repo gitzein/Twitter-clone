@@ -16,11 +16,17 @@ function AddCommentModal({ post, feedType }) {
 
   const formattedPostDate = formatPostDate(post.createdAt);
 
+  const commentLength = comment.split("").length;
+  const almostReachingCommentLimit =
+    commentLength >= 270 && commentLength <= 280;
+  const commentLimitReached = commentLength > 280;
+
   const { postComment, isCommenting } = usePostComment(postId, feedType);
 
   const handlePostComment = (e) => {
     e.preventDefault();
     if (isCommenting) return;
+    if (commentLimitReached) return;
     postComment(comment);
     setComment("");
   };
@@ -118,9 +124,30 @@ function AddCommentModal({ post, feedType }) {
               value={comment}
               onChange={(e) => setComment(e.target.value)}
             />
-            <button className="btn btn-primary rounded-full btn-sm text-white px-4">
-              {isCommenting ? <LoadingSpinner size="md" /> : "Post"}
-            </button>
+            <div className="flex flex-col gap-2 justify-center items-center">
+              {commentLength > 0 && (
+                <div
+                  className={
+                    "opacity-70 text-sm transition-all duration-300 " +
+                    (almostReachingCommentLimit
+                      ? "text-yellow-500"
+                      : commentLimitReached
+                      ? "text-red-500 font-bold"
+                      : "text-gray-500")
+                  }
+                >
+                  {commentLimitReached
+                    ? `-${commentLength - 280}`
+                    : `${commentLength}/280`}
+                </div>
+              )}
+              <button
+                disabled={commentLimitReached}
+                className="btn btn-primary rounded-full btn-sm text-white px-4"
+              >
+                {isCommenting ? <LoadingSpinner size="md" /> : "Post"}
+              </button>
+            </div>
           </form>
         </div>
         <form method="dialog" className="modal-backdrop">

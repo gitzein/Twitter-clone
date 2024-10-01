@@ -2,6 +2,7 @@ const Notification = require("../models/Notification");
 const { v2: cloudinary } = require("cloudinary");
 const User = require("../models/User");
 const bcrypt = require("bcrypt");
+const { default: mongoose } = require("mongoose");
 
 const getUserProfile = async (req, res) => {
   const { username } = req.params;
