@@ -26,7 +26,7 @@ const createPost = async (req, res) => {
 };
 
 const likeOrUnlikePost = async (req, res) => {
-  const userId = req.user._id;
+  const user = req.user;
   const postId = req.params.id;
 
   const isValidObjectId = mongoose.isObjectIdOrHexString(postId);
@@ -34,11 +34,10 @@ const likeOrUnlikePost = async (req, res) => {
     return res.status(400).json({ message: "Post not found" });
 
   const post = await Post.findById(postId).exec();
-  const user = await User.findById(userId).exec();
 
   if (!post) return res.status(400).json({ message: "Post doesn't exist" });
 
-  const isPostLiked = post.likes.indexOf(userId);
+  const isPostLiked = post.likes.indexOf(user._id);
   if (isPostLiked !== -1) {
     // Unlike
     const likedPostIndex = user.likedPosts.indexOf(postId);
@@ -46,11 +45,11 @@ const likeOrUnlikePost = async (req, res) => {
     user.likedPosts.splice(likedPostIndex, 1);
   } else {
     // Like
-    post.likes.push(userId);
+    post.likes.push(user._id);
     user.likedPosts.push(postId);
-    if (userId != post.user.toString()) {
+    if (user._id != post.user.toString()) {
       const notification = new Notification({
-        from: userId,
+        from: user._id,
         to: post.user,
         type: "like",
       });
@@ -130,13 +129,6 @@ const getAllPosts = async (req, res) => {
   const posts = await Post.find()
     .sort({ createdAt: -1 })
     .populate({ path: "user", select: "-password -email" })
-    .populate({
-      path: "comments",
-      populate: {
-        path: "from",
-        select: "username fullName profileImg _id",
-      },
-    })
     .lean()
     .exec();
   if (posts.length === 0) return res.status(204).json([]);
@@ -158,13 +150,6 @@ const getLikedPosts = async (req, res) => {
   const likedPosts = await Post.find({ _id: likedPostsIds })
     .sort({ createdAt: -1 })
     .populate({ path: "user", select: "-password -email" })
-    .populate({
-      path: "comments",
-      populate: {
-        path: "from",
-        select: "username fullName profileImg _id",
-      },
-    })
     .lean()
     .exec();
 
@@ -177,13 +162,6 @@ const getFollowingPosts = async (req, res) => {
   const followingPosts = await Post.find({ user: followeduser })
     .sort({ createdAt: -1 })
     .populate({ path: "user", select: "-password -email" })
-    .populate({
-      path: "comments",
-      populate: {
-        path: "from",
-        select: "username fullName profileImg _id",
-      },
-    })
     .lean()
     .exec();
 
@@ -200,13 +178,6 @@ const getUserPosts = async (req, res) => {
   const userPosts = await Post.find({ user: foundUser._id })
     .sort({ createdAt: -1 })
     .populate({ path: "user", select: "-password -email" })
-    .populate({
-      path: "comments",
-      populate: {
-        path: "from",
-        select: "username fullName profileImg _id",
-      },
-    })
     .lean()
     .exec();
 
@@ -343,6 +314,42 @@ const likeComment = async (req, res) => {
   res.json(comment.likes);
 };
 
+const savePost = async (req, res) => {
+  const user = req.user;
+  const postId = req.params.id;
+
+  const isValidObjectId = mongoose.isObjectIdOrHexString(postId);
+  if (!isValidObjectId)
+    return res.status(400).json({ message: "Post not found" });
+
+  const post = await Post.findById(postId).lean().exec();
+
+  if (!post) return res.status(400).json({ message: "Post doesn't exist" });
+
+  const isSaved = user.savedPosts.indexOf(postId);
+
+  if (isSaved !== -1) {
+    // Unsave
+    user.savedPosts.splice(isSaved, 1);
+  } else {
+    // save
+    user.savedPosts.unshift(postId);
+  }
+  await user.save();
+  res.json(user.savedPosts);
+};
+
+const getSavedPosts = async (req, res) => {
+  const user = req.user;
+
+  const posts = await Post.find({ _id: user.savedPosts })
+    .populate({ path: "user", select: "-password -email" })
+    .lean()
+    .exec();
+
+  res.json(posts);
+};
+
 module.exports = {
   createPost,
   likeOrUnlikePost,
@@ -357,4 +364,6 @@ module.exports = {
   editComment,
   deleteComment,
   likeComment,
+  savePost,
+  getSavedPosts,
 };

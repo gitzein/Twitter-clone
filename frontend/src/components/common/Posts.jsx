@@ -15,6 +15,9 @@ const Posts = ({ feedType, username, userId }) => {
     case "likes":
       POST_ENDPOINT = `/api/posts/likes/${userId}`;
       break;
+    case "save":
+      POST_ENDPOINT = `/api/posts/save`;
+      break;
     default:
       POST_ENDPOINT = "/api/posts/all";
   }
@@ -43,9 +46,9 @@ const Posts = ({ feedType, username, userId }) => {
     },
   });
 
-  useEffect(() => {
+  /* useEffect(() => {
     refetch();
-  }, [feedType, refetch, username]);
+  }, [feedType, refetch, username]); */
 
   return (
     <>
@@ -57,7 +60,7 @@ const Posts = ({ feedType, username, userId }) => {
         </div>
       )}
       {!isLoading && !isRefetching && posts?.length === 0 && (
-        <p className="text-center my-4">No posts in this tab. Switch 👻</p>
+        <p className="text-center my-4">No posts in this tab</p>
       )}
       {!isLoading && !isRefetching && posts && (
         <div className="mb-[30vh]">

@@ -10,6 +10,7 @@ import SignUpPage from "./pages/auth/signup/SignUpPage";
 import Layout from "./components/common/Layout";
 import FollowingPage from "./pages/profile/FollowingPage";
 import SinglePost from "./pages/home/SinglePost";
+import BookmarksPage from "./pages/bookmarks/BookmarksPage";
 
 function App() {
   const { data: authUser, isLoading } = useQuery({
@@ -54,6 +55,7 @@ function App() {
           <Route path="/" element={<HomePage />} />
           <Route path="notifications" element={<NotificationPage />} />
           <Route path="profile/:username" element={<ProfilePage />} />
+          <Route path="bookmarks" element={<BookmarksPage />} />
           <Route path="post/:id" element={<SinglePost />} />
           <Route
             path="following/:username"

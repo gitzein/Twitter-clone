@@ -6,6 +6,7 @@ import LoadingSpinner from "../../components/common/LoadingSpinner";
 import EditPostModal from "../../components/common/EditPostModal";
 import {
   FaArrowLeft,
+  FaBookmark,
   FaHeart,
   FaRegBookmark,
   FaRegComment,
@@ -28,6 +29,8 @@ function SinglePost() {
   const commentInputRef = useRef();
 
   const { data: authUser } = useQuery({ queryKey: ["authUser"] });
+
+  const isPostSaved = authUser?.savedPosts.includes(postId);
 
   const {
     data: post,
@@ -234,7 +237,11 @@ function SinglePost() {
                   </div>
                 </div>
                 <div className="flex w-1/3 justify-end gap-2 items-center">
-                  <FaRegBookmark className="w-4 h-4 text-slate-500 cursor-pointer" />
+                  {isPostSaved ? (
+                    <FaBookmark className="w-4 h-4 text-sky-500 cursor-pointer" />
+                  ) : (
+                    <FaRegBookmark className="w-4 h-4 text-slate-500 cursor-pointer" />
+                  )}
                 </div>
               </div>
             </div>

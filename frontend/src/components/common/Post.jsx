@@ -1,4 +1,4 @@
-import { FaRegComment } from "react-icons/fa";
+import { FaBookmark } from "react-icons/fa";
 import { BiRepost } from "react-icons/bi";
 import { FaRegHeart } from "react-icons/fa";
 import { FaHeart } from "react-icons/fa6";
@@ -6,25 +6,25 @@ import { FaRegBookmark } from "react-icons/fa6";
 import { FaTrash } from "react-icons/fa";
 import { FaWrench } from "react-icons/fa";
 import { BsThreeDots } from "react-icons/bs";
-import { useState } from "react";
 import { Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import LoadingSpinner from "./LoadingSpinner";
 import { formatPostDate } from "../../utils/date";
 import EditPostModal from "./EditPostModal";
 import { useLikePost } from "../../hooks/useLikePost";
-import { usePostComment } from "../../hooks/usePostComment";
 import { useDeletePost } from "../../hooks/useDeletePost";
 import AddCommentModal from "./AddCommentModal";
+import { useSavePost } from "../../hooks/useSavePost";
 
 const Post = ({ post, feedType }) => {
-  const [comment, setComment] = useState("");
   const postOwner = post.user;
   const postId = post._id;
   const { data: authUser } = useQuery({ queryKey: ["authUser"] });
   const isLiked = post.likes.includes(authUser._id);
 
-  const isMyPost = post.user._id === authUser._id;
+  const isMyPost = post.user._id === authUser?._id;
+
+  const isPostSaved = authUser?.savedPosts.includes(post._id);
 
   const formattedPostDate = formatPostDate(post.createdAt);
 
@@ -34,20 +34,18 @@ const Post = ({ post, feedType }) => {
     deletePost();
   };
 
-  const { postComment, isCommenting } = usePostComment(postId, feedType);
-
-  const handlePostComment = (e) => {
-    e.preventDefault();
-    if (isCommenting) return;
-    postComment(comment);
-    setComment("");
-  };
-
   const { likePost, likingPending } = useLikePost(postId, "posts", feedType);
 
   const handleLikePost = () => {
     if (likingPending) return;
     likePost(postId);
+  };
+
+  const { savePost, isSavingPost } = useSavePost();
+
+  const handleSavePost = () => {
+    if (isSavingPost) return;
+    savePost(postId);
   };
 
   return (
@@ -161,8 +159,15 @@ const Post = ({ post, feedType }) => {
                 </span>
               </div>
             </div>
-            <div className="flex w-1/3 justify-end gap-2 items-center">
-              <FaRegBookmark className="w-4 h-4 text-slate-500 cursor-pointer" />
+            <div
+              className="flex w-1/3 justify-end gap-2 items-center"
+              onClick={handleSavePost}
+            >
+              {isPostSaved ? (
+                <FaBookmark className="w-4 h-4 text-sky-500 cursor-pointer" />
+              ) : (
+                <FaRegBookmark className="w-4 h-4 text-slate-500 cursor-pointer" />
+              )}
             </div>
           </div>
         </div>

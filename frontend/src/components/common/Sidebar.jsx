@@ -2,7 +2,7 @@ import XSvg from "../svgs/X";
 
 import { MdHomeFilled } from "react-icons/md";
 import { IoNotifications } from "react-icons/io5";
-import { FaUser } from "react-icons/fa";
+import { FaBookmark, FaUser } from "react-icons/fa";
 import { Link } from "react-router-dom";
 import { BiLogOut } from "react-icons/bi";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
@@ -55,33 +55,33 @@ const Sidebar = () => {
         <Link to="/" className="flex justify-center md:justify-start">
           <XSvg className="px-2 w-12 h-12 rounded-full fill-white hover:bg-stone-900" />
         </Link>
-        <ul className="flex flex-col gap-3 mt-4">
+        <ul className="flex flex-col gap-3 mt-4 justify-center">
           <li className="flex justify-center md:justify-start">
             <Link
               to="/"
               className="flex gap-3 justify-center items-center hover:bg-stone-900 transition-all rounded-full duration-300 py-2 px-2 md:pl-2 md:pr-4 max-w-fit cursor-pointer"
             >
-              <MdHomeFilled className="w-8 h-8" />
+              <MdHomeFilled className="w-7 h-7" />
               <span className="text-lg hidden md:block">Home</span>
             </Link>
           </li>
-          <li className="flex justify-center md:justify-between items-center">
+          <li className="flex justify-center md:justify-start items-center">
             <Link
               to="/notifications"
               className="flex gap-3 items-center hover:bg-stone-900 transition-all rounded-full duration-300 py-2 px-2 md:pl-2 md:pr-4  max-w-fit cursor-pointer"
             >
               <IoNotifications
                 className={
-                  "w-6 h-6 " + (unreadNotif?.length !== 0 && "fill-primary")
+                  "w-7 h-7 " + (unreadNotif?.length !== 0 && "fill-primary")
                 }
               />
-              <span className="text-lg hidden md:block">Notifications</span>
+              <span className=" text-lg hidden md:block">Notifications</span>
+              {unreadNotif && unreadNotif.length !== 0 && (
+                <span className="text-sm ml-1 text-center hidden md:block px-2 rounded-full bg-primary text-white">
+                  {unreadNotif.length}
+                </span>
+              )}
             </Link>
-            {unreadNotif && unreadNotif.length !== 0 && (
-              <span className="text-base text-center hidden md:block px-2 mx-auto rounded-full bg-primary text-white">
-                {unreadNotif.length}
-              </span>
-            )}
           </li>
 
           <li className="flex justify-center md:justify-start">
@@ -89,8 +89,18 @@ const Sidebar = () => {
               to={`/profile/${authUser?.username}`}
               className="flex gap-3 items-center hover:bg-stone-900 transition-all rounded-full duration-300 py-2 px-2 md:pl-2 md:pr-4  max-w-fit cursor-pointer"
             >
-              <FaUser className="w-6 h-6" />
+              <FaUser className="w-7 h-7" />
               <span className="text-lg hidden md:block">Profile</span>
+            </Link>
+          </li>
+
+          <li className="flex justify-center md:justify-start">
+            <Link
+              to={`/bookmarks`}
+              className="flex gap-3 items-center hover:bg-stone-900 transition-all rounded-full duration-300 py-2 px-2 md:pl-2 md:pr-4  max-w-fit cursor-pointer"
+            >
+              <FaBookmark className="w-7 h-7" />
+              <span className="text-lg hidden md:block">Bookmarks</span>
             </Link>
           </li>
         </ul>
