@@ -128,9 +128,9 @@ const ProfilePage = () => {
     updateProfileImg({ coverImg, profileImg });
   };
 
-  useEffect(() => {
+  /*   useEffect(() => {
     refetch();
-  }, [username, refetch]);
+  }, [username, refetch]); */
 
   return (
     <>
@@ -326,7 +326,7 @@ const ProfilePage = () => {
               </div>
             </>
           )}
-
+          <div className=" mb-4 w-full"></div>
           <Posts feedType={feedType} username={username} userId={user?._id} />
         </div>
       </div>

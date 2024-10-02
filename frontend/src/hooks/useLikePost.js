@@ -31,6 +31,12 @@ export const useLikePost = (postId, key1, key2 = "forYou") => {
           return oldData.map((oldPost) => {
             if (oldPost._id === postId) {
               return { ...oldPost, likes: updatedLikes };
+            } else if (oldPost.postReference?._id === postId) {
+              const postWithNewData = {
+                ...oldPost.postReference,
+                likes: updatedLikes,
+              };
+              return { ...oldPost, postReference: postWithNewData };
             }
             return oldPost;
           });

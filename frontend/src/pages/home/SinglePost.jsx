@@ -21,6 +21,7 @@ import { usePostComment } from "../../hooks/usePostComment";
 import { useDeletePost } from "../../hooks/useDeletePost";
 import { BiRepost } from "react-icons/bi";
 import Comment from "../../components/common/Comment";
+import { useRetweet } from "../../hooks/useRetweet";
 
 function SinglePost() {
   const [comment, setComment] = useState("");
@@ -59,6 +60,7 @@ function SinglePost() {
   const isLiked = post?.likes.includes(authUser._id);
   const formattedDate = formatPostDate(post?.createdAt);
   const isMyPost = post?.user._id === authUser._id;
+  const isPostRetweeted = post?.retweets?.includes(authUser?._id);
 
   const { deletePost, isDeleting } = useDeletePost(postId, "post");
 
@@ -87,6 +89,13 @@ function SinglePost() {
     likePost(postId);
   };
 
+  const { retweet, isRetweeting } = useRetweet(postId, "post");
+
+  const handleRetweet = () => {
+    if (isRetweeting) return;
+    retweet();
+  };
+
   if (commentError) {
     setTimeout(() => {
       setCommentError(false);
@@ -103,6 +112,7 @@ function SinglePost() {
           <p className="font-bold text-lg">Post</p>
         </div>
       </div>
+      <div className=" mb-4 w-full"></div>
       {isLoading && (
         <div className="flex flex-col justify-center">
           <PostSkeleton />
@@ -211,10 +221,23 @@ function SinglePost() {
                     </span>
                   </div>
 
-                  <div className="flex gap-1 items-center group cursor-pointer">
-                    <BiRepost className="w-6 h-6  text-slate-500 group-hover:text-green-500" />
-                    <span className="text-sm text-slate-500 group-hover:text-green-500">
-                      0
+                  <div
+                    onClick={handleRetweet}
+                    className="flex gap-1 items-center group cursor-pointer"
+                  >
+                    {isPostRetweeted ? (
+                      <BiRepost className="w-6 h-6   text-green-500 group-hover:text-slate-500" />
+                    ) : (
+                      <BiRepost className="w-6 h-6  text-slate-500 group-hover:text-green-500" />
+                    )}
+                    <span
+                      className={`text-sm  ${
+                        isPostRetweeted
+                          ? "text-green-500 group-hover:text-slate-500"
+                          : "text-slate-500 group-hover:text-green-500"
+                      }`}
+                    >
+                      {post.retweets?.length || 0}
                     </span>
                   </div>
                   <div

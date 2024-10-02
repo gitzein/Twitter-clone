@@ -29,6 +29,20 @@ const postSchema = new mongoose.Schema(
       type: Boolean,
       default: false,
     },
+    retweets: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "User",
+      },
+    ],
+    isRetweetedPost: {
+      type: Boolean,
+      default: false,
+    },
+    postReference: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Post",
+    },
   },
   { timestamps: true }
 );

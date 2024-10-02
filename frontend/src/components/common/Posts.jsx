@@ -2,6 +2,7 @@ import Post from "./Post";
 import PostSkeleton from "../skeletons/PostSkeleton";
 import { useQuery } from "@tanstack/react-query";
 import { useEffect } from "react";
+import RetweetedPost from "./RetweetedPost";
 
 const Posts = ({ feedType, username, userId }) => {
   let POST_ENDPOINT;
@@ -64,9 +65,15 @@ const Posts = ({ feedType, username, userId }) => {
       )}
       {!isLoading && !isRefetching && posts && (
         <div className="mb-[30vh]">
-          {posts.map((post) => (
-            <Post key={post._id} post={post} feedType={feedType} />
-          ))}
+          {posts.map((post) => {
+            if (post.isRetweetedPost === true) {
+              return (
+                <RetweetedPost key={post._id} post={post} feedType={feedType} />
+              );
+            } else {
+              return <Post key={post._id} post={post} feedType={feedType} />;
+            }
+          })}
         </div>
       )}
     </>

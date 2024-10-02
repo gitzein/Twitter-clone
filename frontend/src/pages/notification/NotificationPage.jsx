@@ -9,6 +9,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import toast from "react-hot-toast";
 import { useEffect } from "react";
 import { formatPostDate } from "../../utils/date";
+import { BiRepost } from "react-icons/bi";
 
 const NotificationPage = () => {
   const queryClient = useQueryClient();
@@ -109,6 +110,9 @@ const NotificationPage = () => {
                 {notification.type === "comment" && (
                   <FaCommentDots className="w-7 h-7 text-sky-500" />
                 )}
+                {notification.type === "retweet" && (
+                  <BiRepost className="w-7 h-7 text-green-500" />
+                )}
                 <div className="flex items-center gap-2">
                   <div className="avatar">
                     <div className="w-8 rounded-full">
@@ -130,6 +134,7 @@ const NotificationPage = () => {
                       "liked your comment"}
                     {notification.type === "comment" &&
                       "commented on your post"}
+                    {notification.type === "retweet" && "retweeted your post"}
                   </div>
                 </div>
               </div>

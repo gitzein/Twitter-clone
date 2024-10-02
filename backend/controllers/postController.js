@@ -128,7 +128,11 @@ const deletePost = async (req, res) => {
 const getAllPosts = async (req, res) => {
   const posts = await Post.find()
     .sort({ createdAt: -1 })
-    .populate({ path: "user", select: "-password -email" })
+    .populate({ path: "user", select: "_id username fullName profileImg" })
+    .populate({
+      path: "postReference",
+      populate: { path: "user", select: "_id username fullName profileImg" },
+    })
     .lean()
     .exec();
   if (posts.length === 0) return res.status(204).json([]);
@@ -148,12 +152,15 @@ const getLikedPosts = async (req, res) => {
 
   const likedPostsIds = user.likedPosts;
   const likedPosts = await Post.find({ _id: likedPostsIds })
-    .sort({ createdAt: -1 })
-    .populate({ path: "user", select: "-password -email" })
+    .populate({ path: "user", select: "_id username fullName profileImg" })
+    .populate({
+      path: "postReference",
+      populate: { path: "user", select: "_id username fullName profileImg" },
+    })
     .lean()
     .exec();
 
-  res.json(likedPosts);
+  res.json(likedPosts.reverse());
 };
 
 const getFollowingPosts = async (req, res) => {
@@ -161,7 +168,11 @@ const getFollowingPosts = async (req, res) => {
 
   const followingPosts = await Post.find({ user: followeduser })
     .sort({ createdAt: -1 })
-    .populate({ path: "user", select: "-password -email" })
+    .populate({ path: "user", select: "_id username fullName profileImg" })
+    .populate({
+      path: "postReference",
+      populate: { path: "user", select: "_id username fullName profileImg" },
+    })
     .lean()
     .exec();
 
@@ -177,7 +188,11 @@ const getUserPosts = async (req, res) => {
 
   const userPosts = await Post.find({ user: foundUser._id })
     .sort({ createdAt: -1 })
-    .populate({ path: "user", select: "-password -email" })
+    .populate({ path: "user", select: "_id username fullName profileImg" })
+    .populate({
+      path: "postReference",
+      populate: { path: "user", select: "_id username fullName profileImg" },
+    })
     .lean()
     .exec();
 
@@ -216,7 +231,11 @@ const getSinglePost = async (req, res) => {
     return res.status(400).json({ message: "Post not found" });
 
   const post = await Post.findById(postId)
-    .populate({ path: "user", select: "-password -email" })
+    .populate({ path: "user", select: "_id username fullName profileImg" })
+    .populate({
+      path: "postReference",
+      populate: { path: "user", select: "_id username fullName profileImg" },
+    })
     .populate({
       path: "comments",
       populate: {
@@ -343,11 +362,55 @@ const getSavedPosts = async (req, res) => {
   const user = req.user;
 
   const posts = await Post.find({ _id: user.savedPosts })
-    .populate({ path: "user", select: "-password -email" })
+    .populate({ path: "user", select: "_id username fullName profileImg" })
     .lean()
     .exec();
 
-  res.json(posts);
+  res.json(posts.reverse());
+};
+
+const retweetPost = async (req, res) => {
+  const user = req.user;
+  const postId = req.params.id;
+
+  const isValidObjectId = mongoose.isObjectIdOrHexString(postId);
+  if (!isValidObjectId)
+    return res.status(400).json({ message: "Post not found" });
+
+  const post = await Post.findById(postId).exec();
+
+  if (!post) return res.status(400).json({ message: "Post doesn't exist" });
+
+  const isRetweeted = post.retweets.indexOf(user._id);
+
+  if (isRetweeted !== -1) {
+    // unretweet(?)
+    const postIndexOnUser = user.retweetedPosts.indexOf(postId);
+
+    await Post.findOneAndDelete({ user: user._id, postReference: postId });
+
+    user.retweetedPosts.splice(isRetweeted, 1);
+    post.retweets.splice(postIndexOnUser, 1);
+
+    await post.save();
+    await user.save();
+
+    res.json(post);
+  } else {
+    // retweet
+    const newRetweetedPost = new Post({
+      user: user._id,
+      isRetweetedPost: true,
+      postReference: postId,
+    });
+    await newRetweetedPost.save();
+
+    user.retweetedPosts.push(postId);
+    post.retweets.push(user._id);
+    await post.save();
+    await user.save();
+    res.status(201).json(newRetweetedPost);
+  }
 };
 
 module.exports = {
@@ -366,4 +429,5 @@ module.exports = {
   likeComment,
   savePost,
   getSavedPosts,
+  retweetPost,
 };

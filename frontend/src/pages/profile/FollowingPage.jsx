@@ -37,9 +37,9 @@ function FollowingPage({ followType }) {
 
   const { follow, isPending } = useFollow();
 
-  useEffect(() => {
+  /* useEffect(() => {
     refetch();
-  }, [followInfo, username, refetch]);
+  }, [followInfo, username, refetch]); */
 
   return (
     <div className="flex-[4_4_0] justify-center border-l border-r border-gray-700 min-h-screen">

@@ -37,10 +37,9 @@ const HomePage = () => {
           </div>
         </div>
 
-        {/*  CREATE POST INPUT */}
         <CreatePost />
+        <div className=" mb-4 w-full"></div>
 
-        {/* POSTS */}
         <Posts feedType={feedType} />
       </div>
     </>

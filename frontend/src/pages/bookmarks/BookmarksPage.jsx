@@ -18,6 +18,7 @@ function BookmarksPage() {
           <p className="text-sm text-gray-500">@{authUser.username}</p>
         </div>
       </div>
+      <div className=" mb-4 w-full"></div>
       <Posts feedType="save" />
     </div>
   );
