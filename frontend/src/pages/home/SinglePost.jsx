@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import React, { useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { BsThreeDots } from "react-icons/bs";
 import { Link, useParams } from "react-router-dom";
 import LoadingSpinner from "../../components/common/LoadingSpinner";
@@ -164,7 +164,7 @@ function SinglePost() {
                     {isDeleting ? (
                       <LoadingSpinner size="sm" />
                     ) : (
-                      <div className="dropdown">
+                      <div className="dropdown dropdown-end">
                         <div tabIndex={0} role="button">
                           <BsThreeDots />
                         </div>

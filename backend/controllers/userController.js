@@ -59,6 +59,7 @@ const followOrUnfollowUser = async (req, res) => {
       type: "follow",
       from: userId,
       to: targetId,
+      ref: targetedUser.username,
     });
 
     await newNotification.save();

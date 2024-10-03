@@ -52,6 +52,7 @@ const likeOrUnlikePost = async (req, res) => {
         from: user._id,
         to: post.user,
         type: "like",
+        ref: post._id.toString(),
       });
       await notification.save();
     }
@@ -90,6 +91,7 @@ const commentPost = async (req, res) => {
         from: userId,
         to: post.user,
         type: "comment",
+        ref: post._id.toString(),
       });
       await notification.save();
     }
@@ -146,9 +148,7 @@ const getLikedPosts = async (req, res) => {
   if (!isValidObjectId)
     return res.status(400).json({ message: "User not found" });
 
-  const isItMe = userId === req.user._id.toString();
-
-  const user = isItMe ? req.user : await User.findById(userId).lean().exec();
+  const user = await User.findById(userId).exec();
 
   const likedPostsIds = user.likedPosts;
   const likedPosts = await Post.find({ _id: likedPostsIds })
@@ -160,7 +160,21 @@ const getLikedPosts = async (req, res) => {
     .lean()
     .exec();
 
-  res.json(likedPosts.reverse());
+  const sortedAndValidatedPosts = user.likedPosts
+    .map((id) => {
+      const post = likedPosts.filter(
+        (post) => id.toString() === post._id.toString()
+      );
+      return post[0];
+    })
+    .filter((post) => post !== undefined)
+    .reverse();
+
+  const newSavedPostsArr = sortedAndValidatedPosts.map((post) => post._id);
+  user.likedPosts = newSavedPostsArr;
+  await user.save();
+
+  res.json(sortedAndValidatedPosts);
 };
 
 const getFollowingPosts = async (req, res) => {
@@ -321,6 +335,7 @@ const likeComment = async (req, res) => {
         from: userId,
         to: comment.from,
         type: "likeComment",
+        ref: comment.to.toString(),
       });
       await notification.save();
     }
@@ -359,14 +374,29 @@ const savePost = async (req, res) => {
 };
 
 const getSavedPosts = async (req, res) => {
-  const user = req.user;
+  const userId = req.user._id;
+
+  const user = await User.findById(userId).exec();
 
   const posts = await Post.find({ _id: user.savedPosts })
     .populate({ path: "user", select: "_id username fullName profileImg" })
     .lean()
     .exec();
 
-  res.json(posts.reverse());
+  const sortedAndValidatedPosts = user.savedPosts
+    .map((id) => {
+      const post = posts.filter(
+        (post) => id.toString() === post._id.toString()
+      );
+      return post[0];
+    })
+    .filter((post) => post !== undefined);
+
+  const newSavedPostsArr = sortedAndValidatedPosts.map((post) => post._id);
+  user.savedPosts = newSavedPostsArr;
+  await user.save();
+
+  res.json(sortedAndValidatedPosts);
 };
 
 const retweetPost = async (req, res) => {
@@ -409,6 +439,17 @@ const retweetPost = async (req, res) => {
     post.retweets.push(user._id);
     await post.save();
     await user.save();
+
+    if (user._id != post.user.toString()) {
+      const notification = new Notification({
+        from: user._id,
+        to: post.user,
+        type: "retweet",
+        ref: post._id.toString(),
+      });
+      await notification.save();
+    }
+
     res.status(201).json(newRetweetedPost);
   }
 };

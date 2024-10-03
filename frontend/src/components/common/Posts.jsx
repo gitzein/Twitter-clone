@@ -3,6 +3,7 @@ import PostSkeleton from "../skeletons/PostSkeleton";
 import { useQuery } from "@tanstack/react-query";
 import { useEffect } from "react";
 import RetweetedPost from "./RetweetedPost";
+import { Link } from "react-router-dom";
 
 const Posts = ({ feedType, username, userId }) => {
   let POST_ENDPOINT;
@@ -40,6 +41,7 @@ const Posts = ({ feedType, username, userId }) => {
         } else if (!res.ok) {
           throw new Error("Something went wrong");
         }
+
         return data;
       } catch (error) {
         throw new Error(error);

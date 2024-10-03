@@ -1,5 +1,5 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import toast from "react-hot-toast";
 import { HiPencil } from "react-icons/hi2";
 
@@ -36,7 +36,7 @@ function EditPostModal({ id, text, feedType, editType, postId }) {
     onSuccess: () => {
       if (feedType === "post") {
         queryClient.invalidateQueries({ queryKey: [feedType, id] });
-        document.getElementById(`edit_${editType}_${id}`).close();
+        document.getElementById(`edit_${editType}_${feedType}_${id}`).close();
       } else {
         queryClient.invalidateQueries({ queryKey: ["posts", feedType] });
       }
@@ -74,7 +74,7 @@ function EditPostModal({ id, text, feedType, editType, postId }) {
         queryClient.setQueryData([feedType, postId], (oldData) => {
           return { ...oldData, comments: updatedComments };
         });
-        document.getElementById(`edit_${editType}_${id}`).close();
+        document.getElementById(`edit_${editType}_${feedType}_${id}`).close();
       } else {
         queryClient.invalidateQueries({ queryKey: ["posts", feedType] });
       }
@@ -87,12 +87,19 @@ function EditPostModal({ id, text, feedType, editType, postId }) {
     if (editType === "post") updatePost(newText);
     if (editType === "comment") updateComment(newText);
   };
+
+  useEffect(() => {
+    setNewText(text);
+  }, [text]);
+
   return (
     <>
       <button
         className=" cursor-pointer hover:text-sky-400"
         onClick={() =>
-          document.getElementById(`edit_${editType}_${id}`).showModal()
+          document
+            .getElementById(`edit_${editType}_${feedType}_${id}`)
+            .showModal()
         }
       >
         <div className="flex items-center gap-2">
@@ -100,7 +107,7 @@ function EditPostModal({ id, text, feedType, editType, postId }) {
           <p className=" text-nowrap">Edit {editType}</p>
         </div>
       </button>
-      <dialog id={`edit_${editType}_${id}`} className="modal">
+      <dialog id={`edit_${editType}_${feedType}_${id}`} className="modal">
         <div className="modal-box border rounded-md border-gray-700 shadow-md">
           <h3 className="font-bold text-lg my-3">Update {editType}</h3>
           <form className="flex flex-col gap-4" onSubmit={handleSubmit}>
@@ -119,6 +126,7 @@ function EditPostModal({ id, text, feedType, editType, postId }) {
                   ? "bg-red-500 hover:bg-red-600"
                   : "btn-primary")
               }
+              onClick={(e) => handleSubmit(e)}
             >
               {isUpdatingComment || isUpdatingPost
                 ? "Updating..."
@@ -129,7 +137,16 @@ function EditPostModal({ id, text, feedType, editType, postId }) {
           </form>
         </div>
         <form method="dialog" className="modal-backdrop">
-          <button className="outline-none">close</button>
+          <button
+            className="outline-none"
+            onClick={() =>
+              document
+                .getElementById(`edit_${editType}_${feedType}_${id}`)
+                .close()
+            }
+          >
+            close
+          </button>
         </form>
       </dialog>
     </>

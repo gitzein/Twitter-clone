@@ -1,6 +1,5 @@
 import React from "react";
 import Post from "./Post";
-import { Link } from "react-router-dom";
 import { BiRepost } from "react-icons/bi";
 import { FaTrash } from "react-icons/fa";
 import { useDeletePost } from "../../hooks/useDeletePost";
@@ -18,23 +17,13 @@ function RetweetedPost({ post, feedType }) {
   return (
     <>
       <div className="flex justify-between gap-2 mx-4 text-sm font-bold items-start p-1">
-        <Link
-          to={`/profile/${postOwner.username}`}
-          className="flex flex-1 gap-1 items-center"
-        >
-          <span
-            to={`/profile/${postOwner.username}`}
-            className="text-gray-500 text-xl"
-          >
+        <div className="flex flex-1 gap-1 items-center">
+          <span className="text-gray-500 text-xl">
             <BiRepost />
           </span>
-          <span to={`/profile/${postOwner.username}`} className="text-gray-500">
-            {postOwner.username}
-          </span>
-          <span to={`/profile/${postOwner.username}`} className="text-gray-500">
-            reposted
-          </span>
-        </Link>
+          <span className="text-gray-500">{postOwner.username}</span>
+          <span className="text-gray-500">reposted</span>
+        </div>
         {isMyPost && !post && (
           <div>
             <button

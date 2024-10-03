@@ -1,4 +1,4 @@
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import LoadingSpinner from "../../components/common/LoadingSpinner";
 
 import { IoSettingsOutline } from "react-icons/io5";
@@ -13,6 +13,8 @@ import { BiRepost } from "react-icons/bi";
 
 const NotificationPage = () => {
   const queryClient = useQueryClient();
+
+  const navigate = useNavigate();
 
   const { data: notifications, isLoading } = useQuery({
     queryKey: ["notification"],
@@ -63,7 +65,7 @@ const NotificationPage = () => {
       <div className="flex-[4_4_0] border-l border-r border-gray-700 min-h-screen">
         <div className="flex justify-between items-center p-4 border-b border-gray-700">
           <p className="font-bold">Notifications</p>
-          <div className="dropdown ">
+          <div className="dropdown dropdown-end">
             <div tabIndex={0} role="button" className="m-1">
               <IoSettingsOutline className="w-4" />
             </div>
@@ -95,7 +97,11 @@ const NotificationPage = () => {
           >
             <Link
               className="w-full flex justify-between hover:bg-secondary"
-              to={`/profile/${notification.from.username}`}
+              to={
+                notification.type === "follow"
+                  ? `/profile/${notification.ref}`
+                  : `/post/${notification.ref}`
+              }
             >
               <div className="flex items-center gap-2 p-4">
                 {notification.type === "follow" && (
@@ -113,7 +119,13 @@ const NotificationPage = () => {
                 {notification.type === "retweet" && (
                   <BiRepost className="w-7 h-7 text-green-500" />
                 )}
-                <div className="flex items-center gap-2">
+                <div
+                  className="flex items-center gap-2"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    navigate(`/profile/${notification.from.username}`);
+                  }}
+                >
                   <div className="avatar">
                     <div className="w-8 rounded-full">
                       <img

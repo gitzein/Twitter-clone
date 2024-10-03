@@ -144,6 +144,7 @@ function AddCommentModal({ post, feedType }) {
               <button
                 disabled={commentLimitReached}
                 className="btn btn-primary rounded-full btn-sm text-white px-4"
+                onClick={(e) => handlePostComment(e)}
               >
                 {isCommenting ? <LoadingSpinner size="md" /> : "Post"}
               </button>
@@ -151,7 +152,15 @@ function AddCommentModal({ post, feedType }) {
           </form>
         </div>
         <form method="dialog" className="modal-backdrop">
-          <button className="outline-none">close</button>
+          <button
+            className="outline-none"
+            onClick={(e) => {
+              e.preventDefault();
+              document.getElementById("comments_modal_" + postId).close();
+            }}
+          >
+            close
+          </button>
         </form>
       </dialog>
     </>
