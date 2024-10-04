@@ -22,6 +22,7 @@ import { useDeletePost } from "../../hooks/useDeletePost";
 import { BiRepost } from "react-icons/bi";
 import Comment from "../../components/common/Comment";
 import { useRetweet } from "../../hooks/useRetweet";
+import DeleteComfirmationModal from "../../components/common/DeleteComfirmationModal";
 
 function SinglePost() {
   const [comment, setComment] = useState("");
@@ -184,13 +185,11 @@ function SinglePost() {
                           </li>
                           <li>
                             <a>
-                              <div
-                                onClick={handleDeletePost}
-                                className="flex items-center gap-2 cursor-pointer hover:text-red-500"
-                              >
-                                <FaTrash />
-                                <p className=" text-nowrap">Delete post</p>
-                              </div>
+                              <DeleteComfirmationModal
+                                id={postId}
+                                type={"post"}
+                                func={handleDeletePost}
+                              />
                             </a>
                           </li>
                         </ul>
@@ -273,6 +272,7 @@ function SinglePost() {
             <form
               className="flex gap-2 items-center p-4 border-b border-gray-600"
               onSubmit={handlePostComment}
+              name="comment-input-form"
             >
               <div className="avatar">
                 <div className="w-8 rounded-full">

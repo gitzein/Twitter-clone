@@ -7,6 +7,7 @@ import { BsThreeDots } from "react-icons/bs";
 import EditPostModal from "./EditPostModal";
 import toast from "react-hot-toast";
 import LoadingSpinner from "./LoadingSpinner";
+import DeleteComfirmationModal from "./DeleteComfirmationModal";
 
 function Comment({ comment, feedType, postId }) {
   const { data: authUser } = useQuery({ queryKey: ["authUser"] });
@@ -142,13 +143,11 @@ function Comment({ comment, feedType, postId }) {
                     </li>
                     <li>
                       <a>
-                        <div
-                          onClick={handleDeleteComment}
-                          className="flex items-center gap-2 cursor-pointer hover:text-red-500"
-                        >
-                          <FaTrash />
-                          <p className=" text-nowrap">Delete comment</p>
-                        </div>
+                        <DeleteComfirmationModal
+                          id={comment._id}
+                          type={"comment"}
+                          func={handleDeleteComment}
+                        />
                       </a>
                     </li>
                   </ul>

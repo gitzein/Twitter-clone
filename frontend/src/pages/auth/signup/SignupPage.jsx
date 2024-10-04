@@ -66,6 +66,7 @@ const SignUpPage = () => {
         <form
           className="lg:w-2/3  mx-auto md:mx-20 flex gap-4 flex-col"
           onSubmit={handleSubmit}
+          name="signup-input-form"
         >
           <XSvg className="w-24 lg:hidden fill-white" />
           <h1 className="text-4xl font-extrabold text-white">Join today.</h1>

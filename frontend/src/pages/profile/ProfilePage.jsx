@@ -14,6 +14,7 @@ import { useFollow } from "../../hooks/useFollow";
 import { formatMemberSinceDate } from "../../utils/date";
 import toast from "react-hot-toast";
 import LoadingSpinner from "../../components/common/LoadingSpinner";
+import PostSkeleton from "../../components/skeletons/PostSkeleton";
 
 const ProfilePage = () => {
   const [coverImg, setCoverImg] = useState(null);
@@ -57,10 +58,6 @@ const ProfilePage = () => {
     },
     retry: false,
   });
-
-  if (isError) {
-    toast.error(error.message);
-  }
 
   if (posts) {
     postCount = posts.length;
@@ -327,7 +324,17 @@ const ProfilePage = () => {
             </>
           )}
           <div className=" mb-4 w-full"></div>
-          <Posts feedType={feedType} username={username} userId={user?._id} />
+          {(isLoading || isRefetching) && (
+            <>
+              <PostSkeleton />
+              <PostSkeleton />
+              <PostSkeleton />
+              <PostSkeleton />
+            </>
+          )}
+          {!isLoading && !isRefetching && user && (
+            <Posts feedType={feedType} username={username} userId={user?._id} />
+          )}
         </div>
       </div>
     </>

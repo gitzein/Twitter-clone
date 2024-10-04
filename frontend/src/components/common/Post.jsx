@@ -15,11 +15,13 @@ import { useDeletePost } from "../../hooks/useDeletePost";
 import AddCommentModal from "./AddCommentModal";
 import { useSavePost } from "../../hooks/useSavePost";
 import { useRetweet } from "../../hooks/useRetweet";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import DeleteComfirmationModal from "./DeleteComfirmationModal";
 
 const Post = ({ post, feedType }) => {
   const postOwner = post.user;
   const postId = post._id;
+  const navigate = useNavigate();
   const { data: authUser } = useQuery({ queryKey: ["authUser"] });
   const isLiked = post.likes.includes(authUser._id);
 
@@ -61,20 +63,32 @@ const Post = ({ post, feedType }) => {
     retweet();
   };
 
+  const navigateToProfile = (e) => {
+    e.preventDefault();
+    navigate(`/profile/${postOwner.username}`);
+  };
+
   return (
     <>
-      <Link className="cursor-default" to={`/post/${post._id}`}>
+      <Link className=" cursor-default" to={`/post/${post._id}`}>
         <div className="flex gap-2 items-start border-b border-gray-700 px-4 pb-4 mb-4 transition-all duration-300 hover:bg-neutral-950">
-          <div>
-            <div className="avatar">
-              <div className="w-8 rounded-full overflow-hidden">
-                <img src={postOwner.profileImg || "/avatar-placeholder.png"} />
-              </div>
+          <div
+            className="avatar cursor-pointer"
+            onClick={(e) => navigateToProfile(e)}
+          >
+            <div className="w-8 rounded-full overflow-hidden">
+              <img src={postOwner.profileImg || "/avatar-placeholder.png"} />
             </div>
           </div>
+
           <div className="flex flex-col flex-1">
             <div className="flex gap-1 items-center">
-              <div className="font-bold">{postOwner.fullName}</div>
+              <div
+                className="font-bold cursor-pointer hover:underline"
+                onClick={(e) => navigateToProfile(e)}
+              >
+                {postOwner.fullName}
+              </div>
               <span className="text-gray-700 flex items-center gap-1 text-sm">
                 <div>@{postOwner.username}</div>
                 <span>·</span>
@@ -106,25 +120,23 @@ const Post = ({ post, feedType }) => {
                         className="dropdown-content z-[1] p-0 menu shadow bg-base-100 rounded-box w-fit"
                       >
                         <li className="w-full">
-                          <a>
+                          <div>
                             <EditPostModal
                               id={postId}
                               text={post.text}
                               feedType={feedType}
                               editType={"post"}
                             />
-                          </a>
+                          </div>
                         </li>
                         <li>
-                          <a>
-                            <div
-                              onClick={handleDeletePost}
-                              className="flex items-center gap-2 cursor-pointer hover:text-red-500"
-                            >
-                              <FaTrash />
-                              <p className=" text-nowrap">Delete post</p>
-                            </div>
-                          </a>
+                          <div>
+                            <DeleteComfirmationModal
+                              id={postId}
+                              type={"post"}
+                              func={handleDeletePost}
+                            />
+                          </div>
                         </li>
                       </ul>
                     </div>
@@ -132,8 +144,8 @@ const Post = ({ post, feedType }) => {
                 </span>
               )}
             </div>
-            <div className="flex flex-col gap-3 overflow-hidden">
-              <span>{post.text}</span>
+            <div className="flex flex-col gap-3 w-full">
+              <span className="break-words">{post.text}</span>
               {post.img && (
                 <img
                   src={post.img}

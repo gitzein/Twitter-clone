@@ -10,6 +10,7 @@ import toast from "react-hot-toast";
 import { useEffect } from "react";
 import { formatPostDate } from "../../utils/date";
 import { BiRepost } from "react-icons/bi";
+import DeleteComfirmationModal from "../../components/common/DeleteComfirmationModal";
 
 const NotificationPage = () => {
   const queryClient = useQueryClient();
@@ -74,7 +75,12 @@ const NotificationPage = () => {
               className="dropdown-content z-[1] menu p-2 shadow bg-base-100 rounded-box w-52"
             >
               <li>
-                <a onClick={deleteNotifications}>Delete all notifications</a>
+                <a>
+                  <DeleteComfirmationModal
+                    type={"notification"}
+                    func={deleteNotifications}
+                  />
+                </a>
               </li>
             </ul>
           </div>

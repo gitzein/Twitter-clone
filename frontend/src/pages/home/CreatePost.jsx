@@ -4,9 +4,11 @@ import { useRef, useState } from "react";
 import { IoCloseSharp } from "react-icons/io5";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import toast from "react-hot-toast";
+import EmojiPicker from "emoji-picker-react";
 
 const CreatePost = () => {
   const [text, setText] = useState("");
+  const [showPicker, setShowPicker] = useState(false);
   const [img, setImg] = useState(null);
   const [isImgSizeAllowed, setIsImgSizeAllowed] = useState(true);
   const imgRef = useRef(null);
@@ -71,6 +73,11 @@ const CreatePost = () => {
     }
   };
 
+  const onEmojiClick = (emojiObject, event) => {
+    setText((prevInput) => prevInput + emojiObject.emoji);
+    setShowPicker(false);
+  };
+
   return (
     <div className="flex p-4 items-start gap-4 border-b border-gray-700">
       <div className="avatar">
@@ -78,9 +85,13 @@ const CreatePost = () => {
           <img src={data?.profileImg || "/avatar-placeholder.png"} />
         </div>
       </div>
-      <form className="flex flex-col gap-2 w-full" onSubmit={handleSubmit}>
+      <form
+        className="flex flex-col gap-2 w-full"
+        onSubmit={handleSubmit}
+        name="create-post-form"
+      >
         <textarea
-          className="textarea w-full p-0 text-lg resize-none border-none focus:outline-none  border-gray-800"
+          className="textarea w-full p-0 text-lg input-style resize-none border-none focus:outline-none  border-gray-800"
           placeholder="What is happening?!"
           value={text}
           onChange={(e) => setText(e.target.value)}
@@ -108,7 +119,10 @@ const CreatePost = () => {
               className="fill-primary w-6 h-6 cursor-pointer"
               onClick={() => imgRef.current.click()}
             />
-            <BsEmojiSmileFill className="fill-primary w-5 h-5 cursor-pointer" />
+            <BsEmojiSmileFill
+              onClick={() => setShowPicker(!showPicker)}
+              className="fill-primary w-5 h-5 cursor-pointer"
+            />
           </div>
           <input
             type="file"
@@ -146,6 +160,19 @@ const CreatePost = () => {
         {!isImgSizeAllowed && (
           <div className="text-red-500">
             file size must not be greater than to 5MB
+          </div>
+        )}
+        {showPicker && (
+          <div className="w-full picker-container">
+            <EmojiPicker
+              theme="dark"
+              onEmojiClick={onEmojiClick}
+              style={{ width: "100%" }}
+              emojiStyle="twitter"
+              lazyLoadEmojis={true}
+              autoFocusSearch={false}
+              previewConfig={{ showPreview: false }}
+            />
           </div>
         )}
       </form>

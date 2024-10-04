@@ -1,9 +1,7 @@
 import Post from "./Post";
 import PostSkeleton from "../skeletons/PostSkeleton";
 import { useQuery } from "@tanstack/react-query";
-import { useEffect } from "react";
 import RetweetedPost from "./RetweetedPost";
-import { Link } from "react-router-dom";
 
 const Posts = ({ feedType, username, userId }) => {
   let POST_ENDPOINT;
@@ -54,7 +52,7 @@ const Posts = ({ feedType, username, userId }) => {
   }, [feedType, refetch, username]); */
 
   return (
-    <>
+    <div className="max-w-100%">
       {(isLoading || isRefetching) && (
         <div className="flex flex-col justify-center">
           <PostSkeleton />
@@ -78,7 +76,7 @@ const Posts = ({ feedType, username, userId }) => {
           })}
         </div>
       )}
-    </>
+    </div>
   );
 };
 export default Posts;

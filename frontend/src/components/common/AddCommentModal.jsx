@@ -3,7 +3,7 @@ import { formatPostDate } from "../../utils/date";
 import { usePostComment } from "../../hooks/usePostComment";
 import { useQuery } from "@tanstack/react-query";
 import { FaRegComment, FaWrench } from "react-icons/fa";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import LoadingSpinner from "./LoadingSpinner";
 
 function AddCommentModal({ post, feedType }) {
@@ -13,6 +13,7 @@ function AddCommentModal({ post, feedType }) {
   const postOwner = post.user;
 
   const commentInputRef = useRef();
+  const navigate = useNavigate();
 
   const formattedPostDate = formatPostDate(post.createdAt);
 
@@ -50,33 +51,36 @@ function AddCommentModal({ post, feedType }) {
         id={`comments_modal_${postId}`}
         className="modal border-none outline-none"
       >
-        <div className="modal-box rounded border border-gray-600 max-h-[85vh]">
-          <div className="flex gap-2 text-lg items-start py-4 max-h-[60vh] max-w-[80vh] overflow-y-auto">
-            <Link
-              to={`/profile/${postOwner.username}`}
-              className="outline-none"
-            >
-              <div className="avatar">
-                <div className="w-12 rounded-full overflow-hidden">
+        <div className="modal-box rounded border border-gray-600 max-h-[85vh] max-w-[60%] py-0">
+          <div className="flex gap-2 text-lg items-start py-4 max-h-[65vh] overflow-y-auto">
+            <div className="outline-none">
+              <div
+                className="avatar cursor-pointer"
+                onClick={() => navigate(`/profile/${postOwner.username}`)}
+              >
+                <div className="w-8 rounded-full overflow-hidden">
                   <img
                     src={postOwner.profileImg || "/avatar-placeholder.png"}
                   />
                 </div>
               </div>
-            </Link>
+            </div>
             <div className="flex flex-col flex-1">
               <div className="flex gap-1 items-center">
                 <div className="flex items-center gap-1">
-                  <Link
-                    to={`/profile/${postOwner.username}`}
-                    className="font-bold"
+                  <span
+                    className="font-bold cursor-pointer"
+                    onClick={() => navigate(`/profile/${postOwner.username}`)}
                   >
                     {postOwner.fullName}
-                  </Link>
+                  </span>
                   <span className="text-gray-700 flex items-center gap-1 text-sm">
-                    <Link to={`/profile/${postOwner.username}`}>
+                    <span
+                      className="cursor-pointer"
+                      onClick={() => navigate(`/profile/${postOwner.username}`)}
+                    >
                       @{postOwner.username}
-                    </Link>
+                    </span>
                     <span>·</span>
                     <span>{formattedPostDate}</span>
                     {post.isEdited && (
@@ -91,8 +95,8 @@ function AddCommentModal({ post, feedType }) {
                   </span>
                 </div>
               </div>
-              <Link to={`/post/${post._id}`}>
-                <div className="flex flex-col gap-3 overflow-hidden">
+              <div onClick={() => navigate(`/post/${post._id}`)}>
+                <div className="flex flex-col gap-3 overflow-hidden px-2 cursor-pointer">
                   <span>{post.text}</span>
                   {post.img && (
                     <img
@@ -102,56 +106,65 @@ function AddCommentModal({ post, feedType }) {
                     />
                   )}
                 </div>
-              </Link>
+              </div>
             </div>
           </div>
 
           <form
-            className="flex gap-2 items-center py-2"
+            className="flex gap-2 items-center pt-2"
             onSubmit={handlePostComment}
+            name="comment-modal-form"
           >
-            <Link to={`/profile/${authUser.username}`}>
+            <div
+              onClick={() => navigate(`/profile/${authUser.username}`)}
+              className="cursor-pointer"
+            >
               <div className="avatar">
                 <div className="w-8 rounded-full overflow-hidden">
                   <img src={authUser.profileImg || "/avatar-placeholder.png"} />
                 </div>
               </div>
-            </Link>
+            </div>
             <textarea
               ref={commentInputRef}
-              className="textarea w-full p-1 rounded text-md resize-none border focus:outline-none  border-gray-800"
+              className="textarea w-full p-1 rounded text-lg  resize-none outline-none"
               placeholder="Add a comment..."
               value={comment}
               onChange={(e) => setComment(e.target.value)}
             />
-            <div className="flex flex-col gap-2 justify-center items-center">
-              {commentLength > 0 && (
-                <div
-                  className={
-                    "opacity-70 text-sm transition-all duration-300 " +
-                    (almostReachingCommentLimit
-                      ? "text-yellow-500"
-                      : commentLimitReached
-                      ? "text-red-500 font-bold"
-                      : "text-gray-500")
-                  }
-                >
-                  {commentLimitReached
-                    ? `-${commentLength - 280}`
-                    : `${commentLength}/280`}
-                </div>
-              )}
-              <button
-                disabled={commentLimitReached}
-                className="btn btn-primary rounded-full btn-sm text-white px-4"
-                onClick={(e) => handlePostComment(e)}
-              >
-                {isCommenting ? <LoadingSpinner size="md" /> : "Post"}
-              </button>
-            </div>
           </form>
+
+          <div className="flex justify-end py-2 gap-2 items-center">
+            {commentLength > 0 && (
+              <div
+                className={
+                  "opacity-70 text-sm transition-all duration-300 " +
+                  (almostReachingCommentLimit
+                    ? "text-yellow-500"
+                    : commentLimitReached
+                    ? "text-red-500 font-bold"
+                    : "text-gray-500")
+                }
+              >
+                {commentLimitReached
+                  ? `-${commentLength - 280}`
+                  : `${commentLength}/280`}
+              </div>
+            )}
+            <button
+              disabled={commentLimitReached}
+              className="btn btn-primary rounded-full btn-sm text-white px-4"
+              onClick={(e) => handlePostComment(e)}
+            >
+              {isCommenting ? <LoadingSpinner size="md" /> : "Post"}
+            </button>
+          </div>
         </div>
-        <form method="dialog" className="modal-backdrop">
+        <form
+          method="dialog"
+          className="modal-backdrop"
+          name="close-comment-modal"
+        >
           <button
             className="outline-none"
             onClick={(e) => {

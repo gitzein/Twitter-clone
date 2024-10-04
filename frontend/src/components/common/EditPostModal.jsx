@@ -110,7 +110,11 @@ function EditPostModal({ id, text, feedType, editType, postId }) {
       <dialog id={`edit_${editType}_${feedType}_${id}`} className="modal">
         <div className="modal-box border rounded-md border-gray-700 shadow-md">
           <h3 className="font-bold text-lg my-3">Update {editType}</h3>
-          <form className="flex flex-col gap-4" onSubmit={handleSubmit}>
+          <form
+            className="flex flex-col gap-4"
+            onSubmit={handleSubmit}
+            name="edit-modal-form"
+          >
             <textarea
               className="flex-1 input border border-gray-700 rounded p-2 input-md"
               value={newText}
@@ -136,7 +140,11 @@ function EditPostModal({ id, text, feedType, editType, postId }) {
             </button>
           </form>
         </div>
-        <form method="dialog" className="modal-backdrop">
+        <form
+          method="dialog"
+          className="modal-backdrop"
+          name="close-edit-modal"
+        >
           <button
             className="outline-none"
             onClick={() =>

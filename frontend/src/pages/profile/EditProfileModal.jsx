@@ -103,7 +103,11 @@ const EditProfileModal = ({ authUser }) => {
       <dialog id="edit_profile_modal" className="modal">
         <div className="modal-box border rounded-md border-gray-700 shadow-md">
           <h3 className="font-bold text-lg my-3">Update Profile</h3>
-          <form className="flex flex-col gap-4" onSubmit={handleSubmit}>
+          <form
+            className="flex flex-col gap-4"
+            onSubmit={handleSubmit}
+            name="edit-profile-form"
+          >
             <div className="flex flex-wrap gap-2">
               <input
                 type="text"
@@ -111,6 +115,7 @@ const EditProfileModal = ({ authUser }) => {
                 className="flex-1 input border border-gray-700 rounded p-2 input-md"
                 value={formData.fullName}
                 name="fullName"
+                maxLength={64}
                 onChange={handleInputChange}
               />
               <input
@@ -119,6 +124,7 @@ const EditProfileModal = ({ authUser }) => {
                 className="flex-1 input border border-gray-700 rounded p-2 input-md"
                 value={formData.username}
                 name="username"
+                maxLength={32}
                 onChange={handleInputChange}
               />
             </div>
@@ -129,6 +135,7 @@ const EditProfileModal = ({ authUser }) => {
                 className="flex-1 input border border-gray-700 rounded p-2 input-md"
                 value={formData.email}
                 name="email"
+                maxLength={254}
                 onChange={handleInputChange}
               />
               <textarea
@@ -167,6 +174,7 @@ const EditProfileModal = ({ authUser }) => {
               className="flex-1 input border border-gray-700 rounded p-2 input-md"
               value={formData.link}
               name="link"
+              maxLength={140}
               onChange={handleInputChange}
             />
             {/* {showErrMsg && (
@@ -187,7 +195,11 @@ const EditProfileModal = ({ authUser }) => {
             </button>
           </form>
         </div>
-        <form method="dialog" className="modal-backdrop">
+        <form
+          method="dialog"
+          className="modal-backdrop"
+          name="close-edit-profile-form"
+        >
           <button className="outline-none">close</button>
         </form>
       </dialog>
