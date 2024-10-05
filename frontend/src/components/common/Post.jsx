@@ -17,6 +17,7 @@ import { useSavePost } from "../../hooks/useSavePost";
 import { useRetweet } from "../../hooks/useRetweet";
 import { Link, useNavigate } from "react-router-dom";
 import DeleteComfirmationModal from "./DeleteComfirmationModal";
+import { longStringChecker } from "../../utils/longStringChecker";
 
 const Post = ({ post, feedType }) => {
   const postOwner = post.user;
@@ -145,7 +146,11 @@ const Post = ({ post, feedType }) => {
               )}
             </div>
             <div className="flex flex-col gap-3 w-full">
-              <span className="break-words">{post.text}</span>
+              <span
+                className={"" + (longStringChecker(post.text) && "break-all")}
+              >
+                {post.text}
+              </span>
               {post.img && (
                 <img
                   src={post.img}

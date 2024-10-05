@@ -11,7 +11,6 @@ import {
   FaRegBookmark,
   FaRegComment,
   FaRegHeart,
-  FaTrash,
   FaWrench,
 } from "react-icons/fa";
 import { formatPostDate } from "../../utils/date";
@@ -23,7 +22,8 @@ import { BiRepost } from "react-icons/bi";
 import Comment from "../../components/common/Comment";
 import { useRetweet } from "../../hooks/useRetweet";
 import DeleteComfirmationModal from "../../components/common/DeleteComfirmationModal";
-import EmojiPickerDropdown from "../../components/common/EmojiPickerDropdown";
+import { longStringChecker } from "../../utils/longStringChecker";
+import EmojiPicker from "../../components/common/EmojiPicker";
 
 function SinglePost() {
   const [comment, setComment] = useState("");
@@ -205,7 +205,11 @@ function SinglePost() {
                 )}
               </div>
               <div className="flex flex-col gap-3 overflow-hidden">
-                <span>{post.text}</span>
+                <span
+                  className={"" + (longStringChecker(post.text) && "break-all")}
+                >
+                  {post.text}
+                </span>
                 {post.img && (
                   <img
                     src={post.img}
@@ -303,11 +307,9 @@ function SinglePost() {
                   onChange={(e) => setComment(e.target.value)}
                 />
                 <div className="flex justify-between items-center">
-                  <EmojiPickerDropdown
+                  <EmojiPicker
                     setter={setComment}
-                    posClass={"dropdown-right"}
-                    width="26rem"
-                    height="22rem"
+                    posClass={"dropdown-right dropdown-bottom"}
                   />
                   <div className="flex gap-2 items-center">
                     {commentLength > 0 && (

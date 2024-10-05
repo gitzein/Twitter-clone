@@ -1,15 +1,12 @@
 import { CiImageOn } from "react-icons/ci";
-import { BsEmojiSmileFill } from "react-icons/bs";
 import { useRef, useState } from "react";
 import { IoCloseSharp } from "react-icons/io5";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import toast from "react-hot-toast";
-import EmojiPicker from "emoji-picker-react";
-import EmojiPickerDropdown from "../../components/common/EmojiPickerDropdown";
+import EmojiPicker from "../../components/common/EmojiPicker";
 
 const CreatePost = () => {
   const [text, setText] = useState("");
-  const [showPicker, setShowPicker] = useState(false);
   const [img, setImg] = useState(null);
   const [isImgSizeAllowed, setIsImgSizeAllowed] = useState(true);
   const imgRef = useRef(null);
@@ -74,11 +71,6 @@ const CreatePost = () => {
     }
   };
 
-  const onEmojiClick = (emojiObject, event) => {
-    setText((prevInput) => prevInput + emojiObject.emoji);
-    setShowPicker(false);
-  };
-
   return (
     <div className="flex p-4 items-start gap-4 border-b border-gray-700">
       <div className="avatar">
@@ -120,14 +112,8 @@ const CreatePost = () => {
               className="fill-primary w-6 h-6 cursor-pointer"
               onClick={() => imgRef.current.click()}
             />
-            {/* <BsEmojiSmileFill
-              onClick={() => setShowPicker(!showPicker)}
-              className="fill-primary w-5 h-5 cursor-pointer"
-            /> */}
-            <EmojiPickerDropdown
-              setter={setText}
-              posClass={"dropdown-bottom"}
-            />
+
+            <EmojiPicker setter={setText} />
           </div>
           <input
             type="file"
@@ -167,19 +153,6 @@ const CreatePost = () => {
             file size must not be greater than to 5MB
           </div>
         )}
-        {/* {showPicker && (
-          <div className="w-full picker-container">
-            <EmojiPicker
-              theme="dark"
-              onEmojiClick={onEmojiClick}
-              style={{ width: "100%" }}
-              emojiStyle="twitter"
-              lazyLoadEmojis={true}
-              autoFocusSearch={false}
-              previewConfig={{ showPreview: false }}
-            />
-          </div>
-        )} */}
       </form>
     </div>
   );

@@ -8,6 +8,7 @@ import EditPostModal from "./EditPostModal";
 import toast from "react-hot-toast";
 import LoadingSpinner from "./LoadingSpinner";
 import DeleteComfirmationModal from "./DeleteComfirmationModal";
+import { longStringChecker } from "../../utils/longStringChecker";
 
 function Comment({ comment, feedType, postId }) {
   const { data: authUser } = useQuery({ queryKey: ["authUser"] });
@@ -65,8 +66,6 @@ function Comment({ comment, feedType, postId }) {
     },
     onSuccess: (newCommentLikes) => {
       queryClient.setQueryData(["post", postId], (oldData) => {
-        console.log(oldData, newCommentLikes);
-
         const newCommentsArr = oldData.comments.map((oldComment) => {
           if (oldComment._id === comment._id) {
             return { ...oldComment, likes: newCommentLikes };
@@ -157,7 +156,13 @@ function Comment({ comment, feedType, postId }) {
           )}
         </div>
         <div className="flex flex-1">
-          <div className="text-sm flex flex-1 py-2">{comment.text}</div>
+          <div className="text-sm flex flex-1 py-2">
+            <span
+              className={"" + (longStringChecker(comment.text) && "break-all")}
+            >
+              {comment.text}
+            </span>
+          </div>
           <div
             className="flex gap-1 items-center group cursor-pointer"
             onClick={handleLikeComment}
