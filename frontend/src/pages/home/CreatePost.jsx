@@ -5,6 +5,7 @@ import { IoCloseSharp } from "react-icons/io5";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import toast from "react-hot-toast";
 import EmojiPicker from "emoji-picker-react";
+import EmojiPickerDropdown from "../../components/common/EmojiPickerDropdown";
 
 const CreatePost = () => {
   const [text, setText] = useState("");
@@ -119,9 +120,13 @@ const CreatePost = () => {
               className="fill-primary w-6 h-6 cursor-pointer"
               onClick={() => imgRef.current.click()}
             />
-            <BsEmojiSmileFill
+            {/* <BsEmojiSmileFill
               onClick={() => setShowPicker(!showPicker)}
               className="fill-primary w-5 h-5 cursor-pointer"
+            /> */}
+            <EmojiPickerDropdown
+              setter={setText}
+              posClass={"dropdown-bottom"}
             />
           </div>
           <input
@@ -162,7 +167,7 @@ const CreatePost = () => {
             file size must not be greater than to 5MB
           </div>
         )}
-        {showPicker && (
+        {/* {showPicker && (
           <div className="w-full picker-container">
             <EmojiPicker
               theme="dark"
@@ -174,7 +179,7 @@ const CreatePost = () => {
               previewConfig={{ showPreview: false }}
             />
           </div>
-        )}
+        )} */}
       </form>
     </div>
   );

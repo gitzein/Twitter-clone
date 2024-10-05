@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import React, { useEffect, useRef, useState } from "react";
+import React, { useRef, useState } from "react";
 import { BsThreeDots } from "react-icons/bs";
 import { Link, useParams } from "react-router-dom";
 import LoadingSpinner from "../../components/common/LoadingSpinner";
@@ -23,6 +23,7 @@ import { BiRepost } from "react-icons/bi";
 import Comment from "../../components/common/Comment";
 import { useRetweet } from "../../hooks/useRetweet";
 import DeleteComfirmationModal from "../../components/common/DeleteComfirmationModal";
+import EmojiPickerDropdown from "../../components/common/EmojiPickerDropdown";
 
 function SinglePost() {
   const [comment, setComment] = useState("");
@@ -102,6 +103,11 @@ function SinglePost() {
       setCommentError(false);
     }, 1500);
   }
+
+  const commentLength = comment.split("").length;
+  const almostReachingCommentLimit =
+    commentLength >= 270 && commentLength <= 280;
+  const commentLimitReached = commentLength > 280;
 
   return (
     <div className="flex-[4_4_0]  border-r border-gray-700 min-h-screen">
@@ -270,35 +276,65 @@ function SinglePost() {
           </div>
           <div className="flex flex-col mb-[30vh]">
             <form
-              className="flex gap-2 items-center p-4 border-b border-gray-600"
+              className="flex items-center gap-2 p-4 border-b border-gray-600"
               onSubmit={handlePostComment}
               name="comment-input-form"
             >
-              <div className="avatar">
-                <div className="w-8 rounded-full">
-                  <img
-                    src={authUser?.profileImg || "/avatar-placeholder.png"}
-                  />
+              <div className="flex flex-col">
+                <div className="avatar">
+                  <div className="w-8 h-8 rounded-full overflow-hidden">
+                    <img
+                      src={authUser?.profileImg || "/avatar-placeholder.png"}
+                    />
+                  </div>
                 </div>
               </div>
-              <textarea
-                ref={commentInputRef}
-                className={
-                  "textarea w-full p-1 rounded text-md resize-none border focus:outline-none focus:border-gray-400 " +
-                  (commentError ? "border-red-500" : "border-gray-800")
-                }
-                placeholder={
-                  commentError ? "Can't be empty comment" : "Add a comment..."
-                }
-                value={comment}
-                onChange={(e) => setComment(e.target.value)}
-              />
-              <button
-                disabled={comment === ""}
-                className="btn btn-primary rounded-full btn-sm text-white px-4"
-              >
-                {isCommenting ? <LoadingSpinner size="md" /> : "Post"}
-              </button>
+              <div className="flex flex-col flex-1 gap-4">
+                <textarea
+                  ref={commentInputRef}
+                  className={
+                    "textarea w-full p-1 rounded text-md resize-none border focus:outline-none focus:border-gray-400 " +
+                    (commentError ? "border-red-500" : "border-gray-800")
+                  }
+                  placeholder={
+                    commentError ? "Can't be empty comment" : "Add a comment..."
+                  }
+                  value={comment}
+                  onChange={(e) => setComment(e.target.value)}
+                />
+                <div className="flex justify-between items-center">
+                  <EmojiPickerDropdown
+                    setter={setComment}
+                    posClass={"dropdown-right"}
+                    width="26rem"
+                    height="22rem"
+                  />
+                  <div className="flex gap-2 items-center">
+                    {commentLength > 0 && (
+                      <div
+                        className={
+                          "opacity-70 text-sm transition-all duration-300 " +
+                          (almostReachingCommentLimit
+                            ? "text-yellow-500"
+                            : commentLimitReached
+                            ? "text-red-500 font-bold"
+                            : "text-gray-500")
+                        }
+                      >
+                        {commentLimitReached
+                          ? `-${commentLength - 280}`
+                          : `${commentLength}/280`}
+                      </div>
+                    )}
+                    <button
+                      disabled={comment === ""}
+                      className="btn btn-primary rounded-full btn-sm text-white px-4"
+                    >
+                      {isCommenting ? <LoadingSpinner size="md" /> : "Post"}
+                    </button>
+                  </div>
+                </div>
+              </div>
             </form>
             {post.comments.length !== 0 ? (
               post.comments.map((comment) => (
