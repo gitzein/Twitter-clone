@@ -330,7 +330,7 @@ const likeComment = async (req, res) => {
   if (isLiked === -1) {
     //like
     comment.likes.push(userId);
-    if (userId.toString() !== commentId) {
+    if (userId.toString() !== comment.from.toString()) {
       const notification = new Notification({
         from: userId,
         to: comment.from,
