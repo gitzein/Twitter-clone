@@ -32,6 +32,7 @@ function EmojiPicker({ setter, posClass }) {
               onEmojiSelect={addEmoji}
               theme="dark"
               dynamicWidth={false}
+              /* onClickOutside={() => setShowPicker(!showPicker)} */
             />
           )}
         </div>

@@ -310,6 +310,15 @@ const deleteComment = async (req, res) => {
   if (comment.from.toString() !== userId.toString())
     return res.status(401).json({ message: "Unauthorized" });
 
+  const targetedPost = await Post.findById(comment.to).exec();
+  if (targetedPost) {
+    const commentIndex = targetedPost.comments.indexOf(commentId);
+    if (commentIndex !== -1) {
+      targetedPost.comments.splice(commentIndex, 1);
+      await targetedPost.save();
+    }
+  }
+
   await Comment.findByIdAndDelete(commentId);
   res.json({ message: "Comment deleted" });
 };

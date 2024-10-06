@@ -2,6 +2,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import React, { useEffect, useState } from "react";
 import toast from "react-hot-toast";
 import { HiPencil } from "react-icons/hi2";
+import EmojiPicker from "./EmojiPicker";
 
 function EditPostModal({ id, text, feedType, editType, postId }) {
   const queryClient = useQueryClient();
@@ -121,7 +122,12 @@ function EditPostModal({ id, text, feedType, editType, postId }) {
               name="editPost"
               onChange={(e) => setNewText(e.target.value)}
             />
-
+            <div>
+              <EmojiPicker
+                setter={setNewText}
+                posClass={"dropdown-right dropdown-bottom"}
+              />
+            </div>
             <button
               disabled={isUpdatingCommentError || isUpdatingPostError}
               className={

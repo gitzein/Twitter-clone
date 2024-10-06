@@ -4,7 +4,11 @@ import toast from "react-hot-toast";
 export const usePostComment = (postId, feedType) => {
   const queryClient = useQueryClient();
 
-  const { mutate: postComment, isPending: isCommenting } = useMutation({
+  const {
+    mutate: postComment,
+    isPending: isCommenting,
+    variables,
+  } = useMutation({
     mutationFn: async (text) => {
       try {
         const res = await fetch(`/api/posts/comment/${postId}`, {
@@ -36,5 +40,5 @@ export const usePostComment = (postId, feedType) => {
     },
   });
 
-  return { postComment, isCommenting };
+  return { postComment, isCommenting, variables };
 };

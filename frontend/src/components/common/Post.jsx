@@ -3,7 +3,6 @@ import { BiRepost } from "react-icons/bi";
 import { FaRegHeart } from "react-icons/fa";
 import { FaHeart } from "react-icons/fa6";
 import { FaRegBookmark } from "react-icons/fa6";
-import { FaTrash } from "react-icons/fa";
 import { FaWrench } from "react-icons/fa";
 import { BsThreeDots } from "react-icons/bs";
 import { useQuery } from "@tanstack/react-query";
@@ -20,19 +19,21 @@ import DeleteComfirmationModal from "./DeleteComfirmationModal";
 import { longStringChecker } from "../../utils/longStringChecker";
 
 const Post = ({ post, feedType }) => {
+  const { data: authUser } = useQuery({ queryKey: ["authUser"] });
   const postOwner = post.user;
   const postId = post._id;
   const navigate = useNavigate();
-  const { data: authUser } = useQuery({ queryKey: ["authUser"] });
-  const isLiked = post.likes.includes(authUser._id);
 
   const isMyPost = post.user._id === authUser?._id;
-
-  const isPostSaved = authUser?.savedPosts.includes(post._id);
 
   const isPostRetweeted = post.retweets?.includes(authUser?._id);
 
   const formattedPostDate = formatPostDate(post.createdAt);
+
+  const likesLength = post.likes.length;
+
+  let isLiked = post.likes.includes(authUser._id);
+  let isPostSaved = authUser?.savedPosts.includes(post._id);
 
   const { deletePost, isDeleting } = useDeletePost(postId, feedType);
 
@@ -48,7 +49,21 @@ const Post = ({ post, feedType }) => {
     likePost(postId);
   };
 
+  if (likingPending) {
+    if (!isLiked) {
+      likesLength + 1;
+    } else {
+      likesLength - 1;
+    }
+
+    isLiked = !isLiked;
+  }
+
   const { savePost, isSavingPost } = useSavePost();
+
+  if (isSavingPost) {
+    isPostSaved = !isPostSaved;
+  }
 
   const handleSavePost = (e) => {
     e.preventDefault();
@@ -198,19 +213,18 @@ const Post = ({ post, feedType }) => {
                       isLiked ? "text-pink-500" : ""
                     }`}
                   >
-                    {post.likes.length}
+                    {likesLength}
                   </span>
                 </div>
               </div>
-              <div
-                className="flex w-1/3 justify-end gap-2 items-center"
-                onClick={(e) => handleSavePost(e)}
-              >
-                {isPostSaved ? (
-                  <FaBookmark className="w-4 h-4 text-sky-500 cursor-pointer" />
-                ) : (
-                  <FaRegBookmark className="w-4 h-4 text-slate-500 cursor-pointer" />
-                )}
+              <div className="flex w-1/3 justify-end gap-2 items-center">
+                <div onClick={(e) => handleSavePost(e)}>
+                  {isPostSaved ? (
+                    <FaBookmark className="w-4 h-4 text-sky-500 cursor-pointer" />
+                  ) : (
+                    <FaRegBookmark className="w-4 h-4 text-slate-500 cursor-pointer" />
+                  )}
+                </div>
               </div>
             </div>
           </div>

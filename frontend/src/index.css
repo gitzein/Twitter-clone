@@ -5,7 +5,3 @@
 html {
   scrollbar-gutter: stable;
 }
-
-.EmojiPickerReact.epr-dark-theme {
-  --epr-emoji-size: 1.5rem;
-}

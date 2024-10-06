@@ -24,6 +24,8 @@ import { useRetweet } from "../../hooks/useRetweet";
 import DeleteComfirmationModal from "../../components/common/DeleteComfirmationModal";
 import { longStringChecker } from "../../utils/longStringChecker";
 import EmojiPicker from "../../components/common/EmojiPicker";
+import OptimisticComment from "../../components/common/OptimisticComment";
+import { useSavePost } from "../../hooks/useSavePost";
 
 function SinglePost() {
   const [comment, setComment] = useState("");
@@ -32,8 +34,6 @@ function SinglePost() {
   const commentInputRef = useRef();
 
   const { data: authUser } = useQuery({ queryKey: ["authUser"] });
-
-  const isPostSaved = authUser?.savedPosts.includes(postId);
 
   const {
     data: post,
@@ -59,10 +59,12 @@ function SinglePost() {
     },
   });
   const postOwner = post?.user;
-  const isLiked = post?.likes.includes(authUser._id);
   const formattedDate = formatPostDate(post?.createdAt);
   const isMyPost = post?.user._id === authUser._id;
   const isPostRetweeted = post?.retweets?.includes(authUser?._id);
+  let isLiked = post?.likes.includes(authUser._id);
+  let isPostSaved = authUser?.savedPosts.includes(postId);
+  const likesLength = post?.likes.length;
 
   const { deletePost, isDeleting } = useDeletePost(postId, "post");
 
@@ -70,7 +72,10 @@ function SinglePost() {
     deletePost();
   };
 
-  const { postComment, isCommenting } = usePostComment(postId, "post");
+  const { postComment, isCommenting, variables } = usePostComment(
+    postId,
+    "post"
+  );
 
   const handlePostComment = (e) => {
     e.preventDefault();
@@ -91,6 +96,16 @@ function SinglePost() {
     likePost(postId);
   };
 
+  if (likingPending) {
+    if (!isLiked) {
+      likesLength + 1;
+    } else {
+      likesLength - 1;
+    }
+
+    isLiked = !isLiked;
+  }
+
   const { retweet, isRetweeting } = useRetweet(postId, "post");
 
   const handleRetweet = () => {
@@ -102,6 +117,18 @@ function SinglePost() {
     setTimeout(() => {
       setCommentError(false);
     }, 1500);
+  }
+
+  const { savePost, isSavingPost } = useSavePost();
+
+  const handleSavePost = (e) => {
+    e.preventDefault();
+    if (isSavingPost) return;
+    savePost(postId);
+  };
+
+  if (isSavingPost) {
+    isPostSaved = !isPostSaved;
   }
 
   const commentLength = comment.split("").length;
@@ -264,16 +291,18 @@ function SinglePost() {
                         isLiked ? "text-pink-500" : ""
                       }`}
                     >
-                      {post.likes.length}
+                      {likesLength}
                     </span>
                   </div>
                 </div>
                 <div className="flex w-1/3 justify-end gap-2 items-center">
-                  {isPostSaved ? (
-                    <FaBookmark className="w-4 h-4 text-sky-500 cursor-pointer" />
-                  ) : (
-                    <FaRegBookmark className="w-4 h-4 text-slate-500 cursor-pointer" />
-                  )}
+                  <div onClick={(e) => handleSavePost(e)}>
+                    {isPostSaved ? (
+                      <FaBookmark className="w-4 h-4 text-sky-500 cursor-pointer" />
+                    ) : (
+                      <FaRegBookmark className="w-4 h-4 text-slate-500 cursor-pointer" />
+                    )}
+                  </div>
                 </div>
               </div>
             </div>
@@ -360,6 +389,11 @@ function SinglePost() {
               >
                 No comments yet
               </p>
+            )}
+            {isCommenting && (
+              <div className="flex gap-2 pt-2 pb-4 px-4 opacity-50 items-center border-b border-gray-600">
+                <OptimisticComment textVar={variables} userData={authUser} />
+              </div>
             )}
           </div>
         </>

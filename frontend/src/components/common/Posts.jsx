@@ -47,10 +47,6 @@ const Posts = ({ feedType, username, userId }) => {
     },
   });
 
-  /* useEffect(() => {
-    refetch();
-  }, [feedType, refetch, username]); */
-
   return (
     <div className="max-w-100%">
       {(isLoading || isRefetching) && (
