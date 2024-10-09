@@ -18,7 +18,7 @@ import { Link, useNavigate } from "react-router-dom";
 import DeleteComfirmationModal from "./DeleteComfirmationModal";
 import { longStringChecker } from "../../utils/longStringChecker";
 
-const Post = ({ post, feedType }) => {
+const Post = ({ post, feedType, pageIndex, postIndex }) => {
   const { data: authUser } = useQuery({ queryKey: ["authUser"] });
   const postOwner = post.user;
   const postId = post._id;
@@ -30,7 +30,7 @@ const Post = ({ post, feedType }) => {
 
   const formattedPostDate = formatPostDate(post.createdAt);
 
-  const likesLength = post.likes.length;
+  let likesLength = post.likes.length;
 
   let isLiked = post.likes.includes(authUser._id);
   let isPostSaved = authUser?.savedPosts.includes(post._id);
@@ -41,7 +41,13 @@ const Post = ({ post, feedType }) => {
     deletePost();
   };
 
-  const { likePost, likingPending } = useLikePost(postId, "posts", feedType);
+  const { likePost, likingPending } = useLikePost(
+    postId,
+    "posts",
+    feedType,
+    pageIndex,
+    postIndex
+  );
 
   const handleLikePost = (e) => {
     e.preventDefault();
@@ -51,9 +57,9 @@ const Post = ({ post, feedType }) => {
 
   if (likingPending) {
     if (!isLiked) {
-      likesLength + 1;
+      likesLength++;
     } else {
-      likesLength - 1;
+      likesLength--;
     }
 
     isLiked = !isLiked;

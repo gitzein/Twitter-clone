@@ -1,7 +1,7 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import toast from "react-hot-toast";
 
-export const useLikePost = (postId, key1, key2 = "forYou") => {
+export const useLikePost = (postId, key1, key2) => {
   const queryClient = useQueryClient();
 
   const { mutate: likePost, isPending: likingPending } = useMutation({
@@ -28,18 +28,27 @@ export const useLikePost = (postId, key1, key2 = "forYou") => {
     onSuccess: (updatedLikes) =>
       queryClient.setQueryData([key1, key2], (oldData) => {
         if (key1 === "posts") {
-          return oldData.map((oldPost) => {
-            if (oldPost._id === postId) {
-              return { ...oldPost, likes: updatedLikes };
-            } else if (oldPost.postReference?._id === postId) {
-              const postWithNewData = {
-                ...oldPost.postReference,
-                likes: updatedLikes,
-              };
-              return { ...oldPost, postReference: postWithNewData };
-            }
-            return oldPost;
+          const newPosts = oldData.pages.map((page) => {
+            return page.posts.map((post) => {
+              if (post._id === postId) {
+                return { ...post, likes: updatedLikes };
+              } else if (post.postReference?._id === postId) {
+                const newPostData = {
+                  ...post.postReference,
+                  likes: updatedLikes,
+                };
+                return { ...post, postReference: newPostData };
+              }
+              return post;
+            });
           });
+
+          const newPages = oldData.pages.map((page, i) => ({
+            ...page,
+            posts: newPosts[i],
+          }));
+
+          return { ...oldData, pages: newPages };
         } else if (key1 === "post") {
           return { ...oldData, likes: updatedLikes };
         }

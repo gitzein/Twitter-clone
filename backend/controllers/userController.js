@@ -3,6 +3,7 @@ const { v2: cloudinary } = require("cloudinary");
 const User = require("../models/User");
 const bcrypt = require("bcrypt");
 const { default: mongoose } = require("mongoose");
+const Post = require("../models/Post");
 
 const getUserProfile = async (req, res) => {
   const { username } = req.params;
@@ -14,7 +15,11 @@ const getUserProfile = async (req, res) => {
 
   if (!foundUser) return res.status(400).json({ message: "User not found" });
 
-  res.json(foundUser);
+  const postTotal = await Post.countDocuments({ user: foundUser._id })
+    .lean()
+    .exec();
+
+  res.json({ ...foundUser, postTotal });
 };
 
 const followOrUnfollowUser = async (req, res) => {

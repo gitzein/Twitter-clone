@@ -4,8 +4,9 @@ import { BiRepost } from "react-icons/bi";
 import { FaTrash } from "react-icons/fa";
 import { useDeletePost } from "../../hooks/useDeletePost";
 import { useQuery } from "@tanstack/react-query";
+import { Link } from "react-router-dom";
 
-function RetweetedPost({ post, feedType }) {
+function RetweetedPost({ post, feedType, pageIndex, postIndex }) {
   const postOwner = post.user;
 
   const { data: authUser } = useQuery({ queryKey: ["authUser"] });
@@ -15,13 +16,15 @@ function RetweetedPost({ post, feedType }) {
   const { deletePost, isDeleting } = useDeletePost(post._id, feedType);
 
   return (
-    <>
+    <div className="hover:bg-neutral-950">
       <div className="flex justify-between gap-2 mx-4 text-sm font-bold items-start p-1">
         <div className="flex flex-1 gap-1 items-center">
           <span className="text-gray-500 text-xl">
             <BiRepost />
           </span>
-          <span className="text-gray-500">{postOwner.username}</span>
+          <Link to={`/profile/${postOwner.username}`}>
+            <span className="text-gray-500">{postOwner.username}</span>
+          </Link>
           <span className="text-gray-500">reposted</span>
         </div>
         {isMyPost && !post && (
@@ -44,7 +47,7 @@ function RetweetedPost({ post, feedType }) {
       ) : (
         <Post post={post.postReference} feedType={feedType} />
       )}
-    </>
+    </div>
   );
 }
 

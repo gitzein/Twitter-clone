@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useRef, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 
 import Posts from "../../components/common/Posts";
@@ -17,6 +17,7 @@ import LoadingSpinner from "../../components/common/LoadingSpinner";
 import PostSkeleton from "../../components/skeletons/PostSkeleton";
 
 const ProfilePage = () => {
+  const { data: authUser } = useQuery({ queryKey: ["authUser"] });
   const [coverImg, setCoverImg] = useState(null);
   const [profileImg, setProfileImg] = useState(null);
   const [isImgSizeAllowed, setIsImgSizeAllowed] = useState(true);
@@ -28,18 +29,10 @@ const ProfilePage = () => {
   const coverImgRef = useRef(null);
   const profileImgRef = useRef(null);
 
-  let postCount = 0;
-
-  const { data: authUser } = useQuery({ queryKey: ["authUser"] });
-  const { data: posts } = useQuery({ queryKey: ["posts", "posts"] });
-
   const {
     data: user,
     isLoading,
-    refetch,
     isRefetching,
-    isError,
-    error,
   } = useQuery({
     queryKey: ["userProfile", username],
     queryFn: async () => {
@@ -58,10 +51,6 @@ const ProfilePage = () => {
     },
     retry: false,
   });
-
-  if (posts) {
-    postCount = posts.length;
-  }
 
   const { mutate: updateProfileImg, isPending: isUpdating } = useMutation({
     mutationFn: async ({ coverImg, profileImg }) => {
@@ -125,10 +114,6 @@ const ProfilePage = () => {
     updateProfileImg({ coverImg, profileImg });
   };
 
-  /*   useEffect(() => {
-    refetch();
-  }, [username, refetch]); */
-
   return (
     <>
       <div className="flex-[4_4_0]  border-r border-gray-700 min-h-screen ">
@@ -147,7 +132,7 @@ const ProfilePage = () => {
                 <div className="flex flex-col">
                   <p className="font-bold text-lg">{user?.fullName}</p>
                   <span className="text-sm text-slate-500">
-                    {postCount} posts
+                    {user.postTotal} posts
                   </span>
                 </div>
               </div>

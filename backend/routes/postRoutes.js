@@ -4,6 +4,7 @@ const protectRoute = require("../middleware/protectRoute");
 const postController = require("../controllers/postController");
 
 router.get("/all", protectRoute, postController.getAllPosts);
+router.get("/posts", protectRoute, postController.getPostsPaginated);
 router.get("/user/:username", protectRoute, postController.getUserPosts);
 router.get("/following", protectRoute, postController.getFollowingPosts);
 router.get("/likes/:id", protectRoute, postController.getLikedPosts);

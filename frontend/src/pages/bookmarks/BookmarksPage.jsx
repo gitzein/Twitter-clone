@@ -1,11 +1,15 @@
 import React from "react";
 import Posts from "../../components/common/Posts";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Link } from "react-router-dom";
 import { FaArrowLeft } from "react-icons/fa";
 
 function BookmarksPage() {
   const { data: authUser } = useQuery({ queryKey: ["authUser"] });
+
+  const queryClient = useQueryClient();
+
+  queryClient.invalidateQueries({ queryKey: ["posts", "save"] });
 
   return (
     <div className="flex-[4_4_0]  border-r border-gray-700 min-h-screen ">

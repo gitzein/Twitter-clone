@@ -144,14 +144,32 @@ const getAllPosts = async (req, res) => {
 
 const getLikedPosts = async (req, res) => {
   const userId = req.params.id;
+  const { cursor, limit = 10 } = req.query;
+
   const isValidObjectId = mongoose.isObjectIdOrHexString(userId);
   if (!isValidObjectId)
     return res.status(400).json({ message: "User not found" });
 
   const user = await User.findById(userId).exec();
+  const likedPostsReverse = [...user.likedPosts].reverse();
+  const likedPostsReverseIds = likedPostsReverse.map((id) => id.toString());
 
-  const likedPostsIds = user.likedPosts;
-  const likedPosts = await Post.find({ _id: likedPostsIds })
+  let queryIdsArr = likedPostsReverse.slice(0, Number(limit));
+
+  let query = { _id: queryIdsArr };
+
+  if (cursor) {
+    const cursorIndex = likedPostsReverseIds.indexOf(cursor) + 1;
+
+    queryIdsArr = likedPostsReverseIds.slice(
+      cursorIndex,
+      cursorIndex + Number(limit)
+    );
+    query._id = queryIdsArr;
+  }
+
+  const unsortedPosts = await Post.find(query)
+    .limit(Number(limit))
     .populate({ path: "user", select: "_id username fullName profileImg" })
     .populate({
       path: "postReference",
@@ -160,27 +178,65 @@ const getLikedPosts = async (req, res) => {
     .lean()
     .exec();
 
-  const sortedAndValidatedPosts = user.likedPosts
+  const sortedAndValidatedPosts = queryIdsArr
     .map((id) => {
-      const post = likedPosts.filter(
+      const post = unsortedPosts.filter(
         (post) => id.toString() === post._id.toString()
       );
       return post[0];
     })
-    .filter((post) => post !== undefined)
-    .reverse();
+    .filter((post) => post !== undefined);
 
-  const newSavedPostsArr = sortedAndValidatedPosts.map((post) => post._id);
-  user.likedPosts = newSavedPostsArr;
+  // Eiminating id(s) of post that no longer exist (deleted by the author) from user's array of likedPosts
+  const postsIds = sortedAndValidatedPosts.map((post) => post._id.toString());
+  queryIdsArr.forEach((id) => {
+    const index = postsIds.indexOf(id.toString());
+    if (index === -1) {
+      const indexInMainArr = likedPostsReverse.indexOf(id);
+
+      likedPostsReverse.splice(indexInMainArr, 1);
+    }
+  });
+
+  user.likedPosts = [...likedPostsReverse].reverse();
+
   await user.save();
 
-  res.json(sortedAndValidatedPosts);
+  const prevCursor =
+    cursor && sortedAndValidatedPosts.length > 0
+      ? sortedAndValidatedPosts[0]._id
+      : null;
+  const nextCursor =
+    sortedAndValidatedPosts.length > 0
+      ? sortedAndValidatedPosts[sortedAndValidatedPosts.length - 1]._id
+      : null;
+
+  // filtering posts thats not User's own post to be shown on the front end
+  const otherUserOnlyPosts = sortedAndValidatedPosts.filter(
+    (post) => post.user._id.toString() !== user._id.toString()
+  );
+
+  res.json({
+    posts: otherUserOnlyPosts,
+    prevCursor,
+    nextCursor,
+    totalResult: sortedAndValidatedPosts.length,
+  });
 };
 
 const getFollowingPosts = async (req, res) => {
-  const followeduser = req.user.following;
+  const followedUser = req.user.following;
 
-  const followingPosts = await Post.find({ user: followeduser })
+  const { cursor, limit = 10 } = req.query;
+
+  let query = { user: followedUser };
+
+  if (cursor) {
+    query._id = { $lt: cursor };
+  }
+
+  const posts = await Post.find(query)
+    .limit(Number(limit))
     .sort({ createdAt: -1 })
     .populate({ path: "user", select: "_id username fullName profileImg" })
     .populate({
@@ -190,17 +246,34 @@ const getFollowingPosts = async (req, res) => {
     .lean()
     .exec();
 
-  res.json(followingPosts);
+  const prevCursor = cursor && posts.length > 0 ? posts[0]._id : null;
+  const nextCursor = posts.length > 0 ? posts[posts.length - 1]._id : null;
+
+  res.json({
+    posts,
+    prevCursor,
+    nextCursor,
+    totalResult: posts.length,
+  });
 };
 
 const getUserPosts = async (req, res) => {
   const username = req.params.username;
 
+  const { cursor, limit = 10 } = req.query;
+
   const foundUser = await User.findOne({ username }).lean().exec();
 
   if (!foundUser) return res.status(400).json({ message: "User not found" });
 
-  const userPosts = await Post.find({ user: foundUser._id })
+  let query = { user: foundUser._id };
+
+  if (cursor) {
+    query._id = { $lt: cursor };
+  }
+
+  const posts = await Post.find(query)
+    .limit(Number(limit))
     .sort({ createdAt: -1 })
     .populate({ path: "user", select: "_id username fullName profileImg" })
     .populate({
@@ -210,7 +283,15 @@ const getUserPosts = async (req, res) => {
     .lean()
     .exec();
 
-  res.json(userPosts);
+  const prevCursor = cursor && posts.length > 0 ? posts[0]._id : null;
+  const nextCursor = posts.length > 0 ? posts[posts.length - 1]._id : null;
+
+  res.json({
+    posts,
+    prevCursor,
+    nextCursor,
+    totalResult: posts.length,
+  });
 };
 
 const updatePost = async (req, res) => {
@@ -385,27 +466,70 @@ const savePost = async (req, res) => {
 const getSavedPosts = async (req, res) => {
   const userId = req.user._id;
 
+  const { cursor, limit = 10 } = req.query;
+
   const user = await User.findById(userId).exec();
 
-  const posts = await Post.find({ _id: user.savedPosts })
+  let queryIdsArr = user.savedPosts.slice(0, Number(limit));
+
+  let query = { _id: queryIdsArr };
+
+  if (cursor) {
+    const cursorIndex = user.savedPosts.indexOf(cursor) + 1;
+
+    queryIdsArr = user.savedPosts.slice(
+      cursorIndex,
+      cursorIndex + Number(limit)
+    );
+    query._id = queryIdsArr;
+  }
+
+  const unsortedPosts = await Post.find(query)
+    .limit(Number(limit))
     .populate({ path: "user", select: "_id username fullName profileImg" })
     .lean()
     .exec();
 
   const sortedAndValidatedPosts = user.savedPosts
     .map((id) => {
-      const post = posts.filter(
+      const post = unsortedPosts.filter(
         (post) => id.toString() === post._id.toString()
       );
       return post[0];
     })
     .filter((post) => post !== undefined);
 
-  const newSavedPostsArr = sortedAndValidatedPosts.map((post) => post._id);
-  user.savedPosts = newSavedPostsArr;
+  const cpyMainArr = [...user.savedPosts];
+
+  // Eiminating id(s) of post that no longer exist (deleted by the author) from user's array of savedPosts
+  const postsIds = sortedAndValidatedPosts.map((post) => post._id.toString());
+  queryIdsArr.forEach((id) => {
+    const index = postsIds.indexOf(id.toString());
+    if (index === -1) {
+      const indexInMainArr = cpyMainArr.indexOf(id);
+
+      cpyMainArr.splice(indexInMainArr, 1);
+    }
+  });
+
+  user.savedPosts = [...cpyMainArr];
   await user.save();
 
-  res.json(sortedAndValidatedPosts);
+  const prevCursor =
+    cursor && sortedAndValidatedPosts.length > 0
+      ? sortedAndValidatedPosts[0]._id
+      : null;
+  const nextCursor =
+    sortedAndValidatedPosts.length > 0
+      ? sortedAndValidatedPosts[sortedAndValidatedPosts.length - 1]._id
+      : null;
+
+  res.json({
+    posts: sortedAndValidatedPosts,
+    prevCursor,
+    nextCursor,
+    totalResult: sortedAndValidatedPosts.length,
+  });
 };
 
 const retweetPost = async (req, res) => {
@@ -463,6 +587,32 @@ const retweetPost = async (req, res) => {
   }
 };
 
+const getPostsPaginated = async (req, res) => {
+  const { cursor, limit = 10 } = req.query;
+
+  let query = {};
+
+  if (cursor) {
+    query._id = { $lt: cursor };
+  }
+
+  const posts = await Post.find(query)
+    .limit(Number(limit))
+    .sort({ createdAt: -1 })
+    .populate({ path: "user", select: "_id username fullName profileImg" })
+    .populate({
+      path: "postReference",
+      populate: { path: "user", select: "_id username fullName profileImg" },
+    })
+    .lean()
+    .exec();
+
+  const prevCursor = cursor && posts.length > 0 ? posts[0]._id : null;
+  const nextCursor = posts.length > 0 ? posts[posts.length - 1]._id : null;
+
+  res.json({ posts, prevCursor, nextCursor, totalResult: posts.length });
+};
+
 module.exports = {
   createPost,
   likeOrUnlikePost,
@@ -480,4 +630,5 @@ module.exports = {
   savePost,
   getSavedPosts,
   retweetPost,
+  getPostsPaginated,
 };

@@ -35,6 +35,7 @@ export const usePostComment = (postId, feedType) => {
         queryClient.invalidateQueries({ queryKey: [feedType, postId] });
       } else {
         queryClient.invalidateQueries({ queryKey: ["posts", feedType] });
+        document.getElementById("comments_modal_" + postId).close();
       }
       toast.success("Comment posted");
     },
