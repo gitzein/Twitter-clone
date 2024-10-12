@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useRef, useState } from "react";
 import { formatPostDate } from "../../utils/date";
 import { usePostComment } from "../../hooks/usePostComment";
 import { useQuery } from "@tanstack/react-query";
@@ -51,11 +51,21 @@ function AddCommentModal({ post, feedType }) {
       {/* We're using Modal Component from DaisyUI */}
       <dialog
         id={`comments_modal_${postId}`}
-        className="modal border-none outline-none"
+        className="modal overflow-y-auto border-none outline-none"
       >
-        <div className="modal-box rounded border flex flex-col justify-between border-gray-600 min-h-[75%] max-h-[90%] max-w-[50%] ">
+        <div className="modal-box overflow-y-visible  min-h-fit self-start mt-[5vh] px-4 py-2 rounded-2xl border flex flex-col justify-between border-gray-700 ">
+          <div className="flex pt-2 pb-4 font-bold">
+            <button
+              onClick={() => {
+                document.getElementById("comments_modal_" + postId).close();
+              }}
+              className="px-2"
+            >
+              ✕
+            </button>
+          </div>
           <div className="flex flex-col flex-1 gap-4">
-            <div className="flex gap-2 text-lg items-start py-4 max-h-[65vh] overflow-y-auto">
+            <div className="flex gap-2 text-lg items-start py-4 max-h-[45vh] overflow-y-auto">
               <div className="outline-none">
                 <div
                   className="avatar cursor-pointer"
@@ -122,7 +132,7 @@ function AddCommentModal({ post, feedType }) {
             </div>
 
             <form
-              className="flex gap-2 items-center pt-2"
+              className="flex gap-2 items-start pt-2  pb-8"
               onSubmit={handlePostComment}
               name="comment-modal-form"
             >
@@ -140,7 +150,7 @@ function AddCommentModal({ post, feedType }) {
               </div>
               <textarea
                 ref={commentInputRef}
-                className="textarea w-full p-1 rounded text-lg  resize-none outline-none"
+                className="textarea w-full p-0 rounded text-lg  resize-none outline-none"
                 placeholder="Add a comment..."
                 value={comment}
                 onChange={(e) => setComment(e.target.value)}
@@ -148,12 +158,9 @@ function AddCommentModal({ post, feedType }) {
             </form>
           </div>
 
-          <div className="flex z-[999] justify-between pt-2 items-center">
+          <div className="flex justify-between pt-2 items-center">
             <div className="flex flex-1 items-center">
-              <EmojiPicker
-                setter={setComment}
-                posClass={"dropdown-right dropdown-end"}
-              />
+              <EmojiPicker setter={setComment} posClass={"dropdown-right"} />
             </div>
             <div className="flex gap-2 items-center">
               {commentLength > 0 && (
@@ -184,7 +191,7 @@ function AddCommentModal({ post, feedType }) {
         </div>
         <form
           method="dialog"
-          className="modal-backdrop"
+          className="modal-backdrop bg-sky-200 opacity-20  min-h-[150vh]"
           name="close-comment-modal"
         >
           <button

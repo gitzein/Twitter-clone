@@ -9,7 +9,7 @@ import LoadingSpinner from "./components/common/LoadingSpinner";
 import SignUpPage from "./pages/auth/signup/SignUpPage";
 import Layout from "./components/common/Layout";
 import FollowingPage from "./pages/profile/FollowingPage";
-import SinglePost from "./pages/home/SinglePost";
+import SinglePost from "./pages/single-post/SinglePost";
 import BookmarksPage from "./pages/bookmarks/BookmarksPage";
 
 function App() {

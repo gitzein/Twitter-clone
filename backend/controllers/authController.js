@@ -75,7 +75,7 @@ const login = async (req, res) => {
 
   res.status(200).json({
     id: foundUser._id,
-    fullname: foundUser.fullname,
+    fullName: foundUser.fullName,
     username: foundUser.username,
     email: foundUser.email,
     followers: foundUser.followers,

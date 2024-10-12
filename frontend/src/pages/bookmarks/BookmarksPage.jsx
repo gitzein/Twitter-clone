@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import Posts from "../../components/common/Posts";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Link } from "react-router-dom";
@@ -9,7 +9,9 @@ function BookmarksPage() {
 
   const queryClient = useQueryClient();
 
-  queryClient.invalidateQueries({ queryKey: ["posts", "save"] });
+  useEffect(() => {
+    queryClient.invalidateQueries({ queryKey: ["posts", "save"] });
+  }, []);
 
   return (
     <div className="flex-[4_4_0]  border-r border-gray-700 min-h-screen ">

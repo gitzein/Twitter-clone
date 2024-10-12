@@ -24,6 +24,7 @@ const CreatePost = () => {
     isError,
     error,
   } = useMutation({
+    mutationKey: ["newPost"],
     mutationFn: async ({ text, img }) => {
       try {
         const res = await fetch("/api/posts/create", {

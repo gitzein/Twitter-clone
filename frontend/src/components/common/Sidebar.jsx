@@ -1,15 +1,28 @@
 import XSvg from "../svgs/X";
 
-import { MdHomeFilled } from "react-icons/md";
+import { MdHome, MdHomeFilled } from "react-icons/md";
 import { IoNotifications } from "react-icons/io5";
-import { FaBookmark, FaUser } from "react-icons/fa";
-import { Link } from "react-router-dom";
+import {
+  FaBell,
+  FaBookmark,
+  FaRegBell,
+  FaRegBookmark,
+  FaRegUser,
+  FaUser,
+} from "react-icons/fa";
+import { Link, useLocation } from "react-router-dom";
 import { BiLogOut } from "react-icons/bi";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import toast from "react-hot-toast";
+import { BsHouseDoor, BsHouseDoorFill } from "react-icons/bs";
 
 const Sidebar = () => {
+  const { data: authUser } = useQuery({ queryKey: ["authUser"] });
+
   const queryClient = useQueryClient();
+  let location = useLocation();
+
+  console.log(location.pathname);
 
   const { data: unreadNotif } = useQuery({
     queryKey: ["unreadNotif"],
@@ -47,7 +60,6 @@ const Sidebar = () => {
       toast.error("Logout failed");
     },
   });
-  const { data: authUser } = useQuery({ queryKey: ["authUser"] });
 
   return (
     <div className="md:flex-[2_2_0] w-18 max-w-52">
@@ -59,22 +71,28 @@ const Sidebar = () => {
           <li className="flex justify-center md:justify-start">
             <Link
               to="/"
-              className="flex gap-3 justify-center items-center hover:bg-stone-900 transition-all rounded-full duration-300 py-2 px-2 md:pl-2 md:pr-4 max-w-fit cursor-pointer"
+              className="flex gap-3 justify-center items-center hover:bg-stone-900 transition-all rounded-full duration-500 py-2 px-2 md:pl-2 md:pr-4 max-w-fit cursor-pointer"
             >
-              <MdHomeFilled className="w-7 h-7" />
+              {location.pathname === "/" ? (
+                <BsHouseDoorFill className="w-7 h-7" />
+              ) : (
+                <BsHouseDoor className="w-7 h-7" />
+              )}
+
               <span className="text-lg hidden md:block">Home</span>
             </Link>
           </li>
           <li className="flex justify-center md:justify-start items-center">
             <Link
               to="/notifications"
-              className="flex gap-3 items-center hover:bg-stone-900 transition-all rounded-full duration-300 py-2 px-2 md:pl-2 md:pr-4  max-w-fit cursor-pointer"
+              className="flex gap-3 items-center hover:bg-stone-900 transition-all rounded-full duration-500 py-2 px-2 md:pl-2 md:pr-4  max-w-fit cursor-pointer"
             >
-              <IoNotifications
-                className={
-                  "w-7 h-7 " + (unreadNotif?.length !== 0 && "fill-primary")
-                }
-              />
+              {location.pathname === "/notifications" ? (
+                <FaBell className={"w-7 h-7 "} />
+              ) : (
+                <FaRegBell className={"w-7 h-7 "} />
+              )}
+
               <span className=" text-lg hidden md:block">Notifications</span>
               {unreadNotif && unreadNotif.length !== 0 && (
                 <span className="text-sm ml-1 text-center hidden md:block px-2 rounded-full bg-primary text-white">
@@ -87,9 +105,14 @@ const Sidebar = () => {
           <li className="flex justify-center md:justify-start">
             <Link
               to={`/profile/${authUser?.username}`}
-              className="flex gap-3 items-center hover:bg-stone-900 transition-all rounded-full duration-300 py-2 px-2 md:pl-2 md:pr-4  max-w-fit cursor-pointer"
+              className="flex gap-3 items-center hover:bg-stone-900 transition-all rounded-full duration-500 py-2 px-2 md:pl-2 md:pr-4  max-w-fit cursor-pointer"
             >
-              <FaUser className="w-7 h-7" />
+              {location.pathname === `/profile/${authUser?.username}` ? (
+                <FaUser className="w-7 h-7" />
+              ) : (
+                <FaRegUser className="w-7 h-7" />
+              )}
+
               <span className="text-lg hidden md:block">Profile</span>
             </Link>
           </li>
@@ -97,9 +120,14 @@ const Sidebar = () => {
           <li className="flex justify-center md:justify-start">
             <Link
               to={`/bookmarks`}
-              className="flex gap-3 items-center hover:bg-stone-900 transition-all rounded-full duration-300 py-2 px-2 md:pl-2 md:pr-4  max-w-fit cursor-pointer"
+              className="flex gap-3 items-center hover:bg-stone-900 transition-all rounded-full duration-500 py-2 px-2 md:pl-2 md:pr-4  max-w-fit cursor-pointer"
             >
-              <FaBookmark className="w-7 h-7" />
+              {location.pathname === "/bookmarks" ? (
+                <FaBookmark className="w-7 h-7" />
+              ) : (
+                <FaRegBookmark className="w-7 h-7" />
+              )}
+
               <span className="text-lg hidden md:block">Bookmarks</span>
             </Link>
           </li>
@@ -108,7 +136,7 @@ const Sidebar = () => {
           <div className="mt-auto mb-10 flex gap-2 flex-col items-center md:flex-row  justify-center transition-all duration-300 md:hover:bg-[#181818] py-2 px-4 rounded-full">
             <Link
               to={`/profile/${authUser.username}`}
-              className="flex  gap-1 pl-1 pr-2.5 items-center w-full justify-center transition-all duration-300 rounded-full hover:bg-primary hover:text-white"
+              className="flex  gap-1 pl-1 pr-2.5 items-center w-full justify-center transition-all duration-500 rounded-full hover:bg-primary hover:text-white"
             >
               <div className="avatar hidden md:inline-flex">
                 <div className="w-8 rounded-full">
@@ -128,7 +156,7 @@ const Sidebar = () => {
                 </div>
               </div>
             </Link>
-            <div className="flex justify-center items-center p-2 rounded-full transition-all duration-300 hover:bg-primary">
+            <div className="flex justify-center items-center p-2 rounded-full transition-all duration-500 hover:bg-primary">
               <BiLogOut
                 className="text-2xl cursor-pointer"
                 onClick={(e) => {

@@ -19,7 +19,7 @@ const Posts = ({ feedType, username, userId }) => {
       POST_ENDPOINT = `/api/posts/user/${username}`;
       break;
     case "likes":
-      POST_ENDPOINT = `/api/posts/likes/${userId}`;
+      POST_ENDPOINT = `/api/posts/liked/${userId}`;
       break;
     case "save":
       POST_ENDPOINT = `/api/posts/save`;

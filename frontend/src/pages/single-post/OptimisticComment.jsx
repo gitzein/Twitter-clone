@@ -1,7 +1,7 @@
 import React from "react";
 import { longStringChecker } from "../../utils/longStringChecker";
-import LoadingSpinner from "./LoadingSpinner";
 import { FaRegHeart } from "react-icons/fa";
+import LoadingSpinner from "../../components/common/LoadingSpinner";
 
 function OptimisticComment({ textVar, userData }) {
   return (

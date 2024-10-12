@@ -18,7 +18,8 @@ router.post("/comment/update/:id", protectRoute, postController.editComment);
 router.delete("/comment/:id", protectRoute, postController.deleteComment);
 router.post("/comment/like/:id", protectRoute, postController.likeComment);
 router.post("/post/save/:id", protectRoute, postController.savePost);
-router.get("/save", protectRoute, postController.getSavedPosts);
+router.get("/save", protectRoute, postController.getSavedPostsPaginated);
 router.post("/retweet/:id", protectRoute, postController.retweetPost);
+router.get("/liked/:id", protectRoute, postController.getLikedPostsPaginated);
 
 module.exports = router;

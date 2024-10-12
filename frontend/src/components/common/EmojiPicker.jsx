@@ -5,6 +5,7 @@ import { BsEmojiSmile } from "react-icons/bs";
 
 function EmojiPicker({ setter, posClass }) {
   const [showPicker, setShowPicker] = useState(false);
+
   const addEmoji = (e) => {
     let sym = e.unified.split("-");
     let codesArray = [];
@@ -12,6 +13,7 @@ function EmojiPicker({ setter, posClass }) {
     let emoji = String.fromCodePoint(...codesArray);
     setter((prevInput) => prevInput + emoji);
   };
+
   return (
     <div className={"dropdown " + posClass}>
       <div
@@ -21,19 +23,10 @@ function EmojiPicker({ setter, posClass }) {
       >
         <BsEmojiSmile className=" w-5 h-5 text-primary cursor-pointer" />
       </div>
-      <div
-        tabIndex={0}
-        className="dropdown-content card card-compact text-primary-content z-[1] p-2 shadow"
-      >
-        <div>
+      <div tabIndex={0} className="dropdown-content">
+        <div className="shadow-lg shadow-secondary ">
           {showPicker && (
-            <Picker
-              data={emojiData}
-              onEmojiSelect={addEmoji}
-              theme="dark"
-              dynamicWidth={false}
-              /* onClickOutside={() => setShowPicker(!showPicker)} */
-            />
+            <Picker data={emojiData} onEmojiSelect={addEmoji} theme="dark" />
           )}
         </div>
       </div>

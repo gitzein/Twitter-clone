@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import React, { useRef, useState } from "react";
+import React, { useRef } from "react";
 import { BsThreeDots } from "react-icons/bs";
 import { Link, useParams } from "react-router-dom";
 import LoadingSpinner from "../../components/common/LoadingSpinner";
@@ -19,17 +19,15 @@ import { useLikePost } from "../../hooks/useLikePost";
 import { usePostComment } from "../../hooks/usePostComment";
 import { useDeletePost } from "../../hooks/useDeletePost";
 import { BiRepost } from "react-icons/bi";
-import Comment from "../../components/common/Comment";
+import Comment from "./Comment";
 import { useRetweet } from "../../hooks/useRetweet";
 import DeleteComfirmationModal from "../../components/common/DeleteComfirmationModal";
 import { longStringChecker } from "../../utils/longStringChecker";
-import EmojiPicker from "../../components/common/EmojiPicker";
-import OptimisticComment from "../../components/common/OptimisticComment";
+import OptimisticComment from "./OptimisticComment";
 import { useSavePost } from "../../hooks/useSavePost";
+import CommentInput from "./CommentInput";
 
 function SinglePost() {
-  const [comment, setComment] = useState("");
-  const [commentError, setCommentError] = useState(false);
   const { id: postId } = useParams();
   const commentInputRef = useRef();
 
@@ -77,18 +75,6 @@ function SinglePost() {
     "post"
   );
 
-  const handlePostComment = (e) => {
-    e.preventDefault();
-    if (isCommenting) return;
-    if (comment.trim() === "") {
-      setCommentError(true);
-      setComment("");
-      return;
-    }
-    postComment(comment);
-    setComment("");
-  };
-
   const { likePost, likingPending } = useLikePost(postId, "post", postId);
 
   const handleLikePost = () => {
@@ -113,12 +99,6 @@ function SinglePost() {
     retweet();
   };
 
-  if (commentError) {
-    setTimeout(() => {
-      setCommentError(false);
-    }, 1500);
-  }
-
   const { savePost, isSavingPost } = useSavePost();
 
   const handleSavePost = (e) => {
@@ -131,13 +111,8 @@ function SinglePost() {
     isPostSaved = !isPostSaved;
   }
 
-  const commentLength = comment.split("").length;
-  const almostReachingCommentLimit =
-    commentLength >= 270 && commentLength <= 280;
-  const commentLimitReached = commentLength > 280;
-
   return (
-    <div className="flex-[4_4_0]  border-r border-gray-700 min-h-screen">
+    <div className="flex-[4_4_0]  border-r border-gray-700 ">
       <div className="flex gap-10 px-4 py-2 items-center">
         <Link to={-1}>
           <FaArrowLeft className="w-4 h-4" />
@@ -308,65 +283,12 @@ function SinglePost() {
             </div>
           </div>
           <div className="flex flex-col mb-[30vh]">
-            <form
-              className="flex items-center gap-2 p-4 border-b border-gray-600"
-              onSubmit={handlePostComment}
-              name="comment-input-form"
-            >
-              <div className="flex flex-col">
-                <div className="avatar">
-                  <div className="w-8 h-8 rounded-full overflow-hidden">
-                    <img
-                      src={authUser?.profileImg || "/avatar-placeholder.png"}
-                    />
-                  </div>
-                </div>
-              </div>
-              <div className="flex flex-col flex-1 gap-4">
-                <textarea
-                  ref={commentInputRef}
-                  className={
-                    "textarea w-full p-1 rounded text-md resize-none border focus:outline-none focus:border-gray-400 " +
-                    (commentError ? "border-red-500" : "border-gray-800")
-                  }
-                  placeholder={
-                    commentError ? "Can't be empty comment" : "Add a comment..."
-                  }
-                  value={comment}
-                  onChange={(e) => setComment(e.target.value)}
-                />
-                <div className="flex justify-between items-center">
-                  <EmojiPicker
-                    setter={setComment}
-                    posClass={"dropdown-right dropdown-bottom"}
-                  />
-                  <div className="flex gap-2 items-center">
-                    {commentLength > 0 && (
-                      <div
-                        className={
-                          "opacity-70 text-sm transition-all duration-300 " +
-                          (almostReachingCommentLimit
-                            ? "text-yellow-500"
-                            : commentLimitReached
-                            ? "text-red-500 font-bold"
-                            : "text-gray-500")
-                        }
-                      >
-                        {commentLimitReached
-                          ? `-${commentLength - 280}`
-                          : `${commentLength}/280`}
-                      </div>
-                    )}
-                    <button
-                      disabled={comment === ""}
-                      className="btn btn-primary rounded-full btn-sm text-white px-4"
-                    >
-                      {isCommenting ? <LoadingSpinner size="md" /> : "Post"}
-                    </button>
-                  </div>
-                </div>
-              </div>
-            </form>
+            <CommentInput
+              postComment={postComment}
+              isCommenting={isCommenting}
+              authUser={authUser}
+              inputRef={commentInputRef}
+            />
             {post.comments.length !== 0 ? (
               post.comments.map((comment) => (
                 <div
@@ -391,10 +313,11 @@ function SinglePost() {
               </p>
             )}
             {isCommenting && (
-              <div className="flex gap-2 pt-2 pb-4 px-4 opacity-50 items-center border-b border-gray-600">
+              <div className="flex gap-2 pt-2 pb-4 px-4 opacity-50 items-center border-b border-gray-600 showAnimation">
                 <OptimisticComment textVar={variables} userData={authUser} />
               </div>
             )}
+            <div className="min-h-[50vh]"></div>
           </div>
         </>
       )}

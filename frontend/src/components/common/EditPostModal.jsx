@@ -37,10 +37,10 @@ function EditPostModal({ id, text, feedType, editType, postId }) {
     onSuccess: () => {
       if (feedType === "post") {
         queryClient.invalidateQueries({ queryKey: [feedType, id] });
-        document.getElementById(`edit_${editType}_${feedType}_${id}`).close();
       } else {
         queryClient.invalidateQueries({ queryKey: ["posts", feedType] });
       }
+      document.getElementById(`edit_${editType}_${feedType}_${id}`).close();
       toast.success("Edited!");
     },
   });
@@ -96,7 +96,7 @@ function EditPostModal({ id, text, feedType, editType, postId }) {
   return (
     <>
       <button
-        className=" cursor-pointer hover:text-sky-400"
+        className="flex gap-1 items-center cursor-pointer group"
         onClick={() =>
           document
             .getElementById(`edit_${editType}_${feedType}_${id}`)
@@ -108,8 +108,23 @@ function EditPostModal({ id, text, feedType, editType, postId }) {
           <p className=" text-nowrap">Edit {editType}</p>
         </div>
       </button>
-      <dialog id={`edit_${editType}_${feedType}_${id}`} className="modal">
-        <div className="modal-box border rounded-md border-gray-700 shadow-md">
+      <dialog
+        id={`edit_${editType}_${feedType}_${id}`}
+        className="modal overflow-y-auto border-none outline-none"
+      >
+        <div className="modal-box justify-items-start cursor-auto self-start mt-[5vh] overflow-y-visible px-4 py-2  border rounded-2xl border-gray-700 shadow-md">
+          <div className="flex pt-2 pb-4 font-bold">
+            <button
+              onClick={() => {
+                document
+                  .getElementById(`edit_${editType}_${feedType}_${id}`)
+                  .close();
+              }}
+              className="px-2"
+            >
+              ✕
+            </button>
+          </div>
           <h3 className="font-bold text-lg my-3">Update {editType}</h3>
           <form
             className="flex flex-col gap-4"
@@ -123,10 +138,7 @@ function EditPostModal({ id, text, feedType, editType, postId }) {
               onChange={(e) => setNewText(e.target.value)}
             />
             <div>
-              <EmojiPicker
-                setter={setNewText}
-                posClass={"dropdown-right dropdown-bottom"}
-              />
+              <EmojiPicker setter={setNewText} posClass={"dropdown-right"} />
             </div>
             <button
               disabled={isUpdatingCommentError || isUpdatingPostError}
@@ -152,7 +164,7 @@ function EditPostModal({ id, text, feedType, editType, postId }) {
           name="close-edit-modal"
         >
           <button
-            className="outline-none"
+            className="outline-none bg-sky-200 opacity-20  min-h-[150vh]"
             onClick={() =>
               document
                 .getElementById(`edit_${editType}_${feedType}_${id}`)

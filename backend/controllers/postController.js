@@ -160,6 +160,7 @@ const getLikedPosts = async (req, res) => {
 
   if (cursor) {
     const cursorIndex = likedPostsReverseIds.indexOf(cursor) + 1;
+    console.log("cursorIndex:", cursorIndex, "cursor:", cursor);
 
     queryIdsArr = likedPostsReverseIds.slice(
       cursorIndex,
@@ -167,6 +168,7 @@ const getLikedPosts = async (req, res) => {
     );
     query._id = queryIdsArr;
   }
+  console.log("queryIdsArr:", queryIdsArr);
 
   const unsortedPosts = await Post.find(query)
     .limit(Number(limit))
@@ -206,10 +208,41 @@ const getLikedPosts = async (req, res) => {
     cursor && sortedAndValidatedPosts.length > 0
       ? sortedAndValidatedPosts[0]._id
       : null;
+  /* const nextCursor =
+    sortedAndValidatedPosts.length > 0
+      ? sortedAndValidatedPosts[sortedAndValidatedPosts.length - 1]._id
+      : null; */
+
+  console.log(
+    "index:",
+    likedPostsReverseIds.indexOf(cursor) + 1 !== likedPostsReverseIds.length,
+    likedPostsReverseIds.indexOf(
+      queryIdsArr[queryIdsArr.length - 1]?.toString()
+    ) + 1,
+    likedPostsReverseIds.length,
+    queryIdsArr.length !== 0
+  );
+
   const nextCursor =
     sortedAndValidatedPosts.length > 0
       ? sortedAndValidatedPosts[sortedAndValidatedPosts.length - 1]._id
+      : queryIdsArr.length !== 0
+      ? likedPostsReverseIds.indexOf(
+          queryIdsArr[queryIdsArr.length - 1].toString()
+        ) +
+          1 !==
+        likedPostsReverseIds.length
+        ? likedPostsReverseIds[
+            (
+              likedPostsReverseIds.indexOf(
+                queryIdsArr[queryIdsArr.length - 1]
+              ) + 1
+            ).toString()
+          ]
+        : null
       : null;
+
+  console.log(nextCursor);
 
   // filtering posts thats not User's own post to be shown on the front end
   const otherUserOnlyPosts = sortedAndValidatedPosts.filter(
@@ -221,6 +254,67 @@ const getLikedPosts = async (req, res) => {
     prevCursor,
     nextCursor,
     totalResult: sortedAndValidatedPosts.length,
+  });
+};
+
+const getLikedPostsPaginated = async (req, res) => {
+  const userId = req.params.id;
+  const { cursor, limit = 10 } = req.query;
+
+  const isValidObjectId = mongoose.isObjectIdOrHexString(userId);
+  if (!isValidObjectId)
+    return res.status(400).json({ message: "User not found" });
+
+  const user = await User.findById(userId).exec();
+
+  if (!user) return res.status(400).json({ message: "User not found" });
+
+  const likedPostsArr = [...user.likedPosts].reverse();
+  const likedPostsIdsLookup = likedPostsArr.map((id) => id.toString());
+
+  let order = [...likedPostsArr];
+
+  if (cursor) {
+    order = likedPostsArr.slice(Number(cursor));
+  }
+
+  const likedPosts = await Post.aggregate([
+    { $match: { _id: { $in: order }, user: { $ne: user._id } } },
+    { $addFields: { __order: { $indexOfArray: [order, "$_id"] } } },
+    { $sort: { __order: 1 } },
+    { $limit: Number(limit) },
+    {
+      $lookup: {
+        from: "users",
+        localField: "user",
+        foreignField: "_id",
+        as: "user",
+        pipeline: [
+          {
+            $project: { _id: 1, username: 1, fullName: 1, profileImg: 1 },
+          },
+        ],
+      },
+    },
+    { $unwind: "$user" },
+  ]);
+
+  const prevCursor =
+    cursor && likedPosts.length > 0
+      ? likedPostsIdsLookup.indexOf(likedPosts[0]._id.toString())
+      : null;
+  const nextCursor =
+    likedPosts.length > 0
+      ? likedPostsIdsLookup.indexOf(
+          likedPosts[likedPosts.length - 1]._id.toString()
+        ) + 1
+      : null;
+
+  res.json({
+    posts: likedPosts,
+    prevCursor,
+    nextCursor,
+    totalResult: likedPosts.length,
   });
 };
 
@@ -532,6 +626,58 @@ const getSavedPosts = async (req, res) => {
   });
 };
 
+const getSavedPostsPaginated = async (req, res) => {
+  const { cursor, limit = 10 } = req.query;
+
+  const savedPostsArr = req.user.savedPosts;
+  const savedPostsIdsLookup = savedPostsArr.map((id) => id.toString());
+
+  let order = [...savedPostsArr];
+
+  if (cursor) {
+    order = savedPostsArr.slice(Number(cursor));
+  }
+
+  const savedPosts = await Post.aggregate([
+    { $match: { _id: { $in: order } } },
+    { $addFields: { __order: { $indexOfArray: [order, "$_id"] } } },
+    { $sort: { __order: 1 } },
+    { $limit: Number(limit) },
+    {
+      $lookup: {
+        from: "users",
+        localField: "user",
+        foreignField: "_id",
+        as: "user",
+        pipeline: [
+          {
+            $project: { _id: 1, username: 1, fullName: 1, profileImg: 1 },
+          },
+        ],
+      },
+    },
+    { $unwind: "$user" },
+  ]);
+
+  const prevCursor =
+    cursor && savedPosts.length > 0
+      ? savedPostsIdsLookup.indexOf(savedPosts[0]._id.toString())
+      : null;
+  const nextCursor =
+    savedPosts.length > 0
+      ? savedPostsIdsLookup.indexOf(
+          savedPosts[savedPosts.length - 1]._id.toString()
+        ) + 1
+      : null;
+
+  res.json({
+    posts: savedPosts,
+    prevCursor,
+    nextCursor,
+    totalResult: savedPosts.length,
+  });
+};
+
 const retweetPost = async (req, res) => {
   const user = req.user;
   const postId = req.params.id;
@@ -631,4 +777,6 @@ module.exports = {
   getSavedPosts,
   retweetPost,
   getPostsPaginated,
+  getLikedPostsPaginated,
+  getSavedPostsPaginated,
 };

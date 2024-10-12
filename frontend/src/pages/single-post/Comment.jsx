@@ -4,10 +4,10 @@ import { FaHeart, FaRegHeart, FaTrash, FaWrench } from "react-icons/fa";
 import { Link } from "react-router-dom";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { BsThreeDots } from "react-icons/bs";
-import EditPostModal from "./EditPostModal";
+import EditPostModal from "../../components/common/EditPostModal";
 import toast from "react-hot-toast";
-import LoadingSpinner from "./LoadingSpinner";
-import DeleteComfirmationModal from "./DeleteComfirmationModal";
+import LoadingSpinner from "../../components/common/LoadingSpinner";
+import DeleteComfirmationModal from "../../components/common/DeleteComfirmationModal";
 import { longStringChecker } from "../../utils/longStringChecker";
 
 function Comment({ comment, feedType, postId }) {
@@ -78,7 +78,18 @@ function Comment({ comment, feedType, postId }) {
     },
   });
 
-  const isLiked = comment.likes.includes(authUser._id);
+  let isLiked = comment.likes.includes(authUser._id);
+  let likesLength = comment.likes.length;
+
+  if (isLiking) {
+    if (!isLiked) {
+      likesLength++;
+    } else {
+      likesLength--;
+    }
+
+    isLiked = !isLiked;
+  }
 
   const handleLikeComment = () => {
     if (isLiking) return;
@@ -94,7 +105,7 @@ function Comment({ comment, feedType, postId }) {
           </div>
         </div>
       </Link>
-      <div className="flex flex-col flex-1">
+      <div className={"flex flex-col flex-1 " + (isDeleting && "opacity-50")}>
         <div className="flex items-center gap-1">
           <Link to={`/profile/${comment.from.username}`}>
             <span className="font-bold">{comment.from.fullName}</span>
@@ -178,7 +189,7 @@ function Comment({ comment, feedType, postId }) {
                 isLiked ? "text-pink-500" : ""
               }`}
             >
-              {comment.likes.length}
+              {likesLength}
             </span>
           </div>
         </div>
