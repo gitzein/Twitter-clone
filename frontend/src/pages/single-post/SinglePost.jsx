@@ -26,6 +26,7 @@ import { longStringChecker } from "../../utils/longStringChecker";
 import OptimisticComment from "./OptimisticComment";
 import { useSavePost } from "../../hooks/useSavePost";
 import CommentInput from "./CommentInput";
+import { LineBreaker } from "../../utils/lineBreaker";
 
 function SinglePost() {
   const { id: postId } = useParams();
@@ -207,11 +208,14 @@ function SinglePost() {
                 )}
               </div>
               <div className="flex flex-col gap-3 overflow-hidden">
-                <span
-                  className={"" + (longStringChecker(post.text) && "break-all")}
+                <div
+                  className={
+                    "max-h-[35vh] overflow-auto " +
+                    (longStringChecker(post.text) && "break-all")
+                  }
                 >
-                  {post.text}
-                </span>
+                  <LineBreaker string={post.text} />
+                </div>
                 {post.img && (
                   <img
                     src={post.img}
@@ -291,10 +295,7 @@ function SinglePost() {
             />
             {post.comments.length !== 0 ? (
               post.comments.map((comment) => (
-                <div
-                  key={comment._id}
-                  className="flex gap-2 pt-2 pb-4 px-4 items-center border-b border-gray-600"
-                >
+                <div key={comment._id}>
                   <Comment
                     comment={comment}
                     feedType={"post"}

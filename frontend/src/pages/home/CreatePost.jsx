@@ -1,15 +1,17 @@
 import { CiImageOn } from "react-icons/ci";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { IoCloseSharp } from "react-icons/io5";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import toast from "react-hot-toast";
 import EmojiPicker from "../../components/common/EmojiPicker";
+import AutoHeightTextarea from "../../components/common/AutoHeightTextarea";
 
 const CreatePost = () => {
   const [text, setText] = useState("");
   const [img, setImg] = useState(null);
   const [isImgSizeAllowed, setIsImgSizeAllowed] = useState(true);
   const imgRef = useRef(null);
+  const newPostInputRef = useRef(null);
 
   const { data } = useQuery({ queryKey: ["authUser"] });
   const queryClient = useQueryClient();
@@ -54,7 +56,11 @@ const CreatePost = () => {
   const handleSubmit = (e) => {
     e.preventDefault();
     if (textLimitReached) return;
-    createPostMutation({ text, img });
+    if (text.trim() === "" && !img) {
+      setText("");
+      return;
+    }
+    createPostMutation({ text: text.trim(), img });
   };
 
   const handleImgChange = (e) => {
@@ -72,8 +78,14 @@ const CreatePost = () => {
     }
   };
 
+  useEffect(() => {
+    newPostInputRef.current.style.height = "auto";
+    newPostInputRef.current.style.height =
+      newPostInputRef.current.scrollHeight + "px";
+  }, [text]);
+
   return (
-    <div className="flex p-4 items-start gap-4 border-b border-gray-700">
+    <div className="flex px-4 py-2 items-start gap-4 border-b border-gray-700">
       <div className="avatar">
         <div className="w-8 rounded-full">
           <img src={data?.profileImg || "/avatar-placeholder.png"} />
@@ -84,11 +96,11 @@ const CreatePost = () => {
         onSubmit={handleSubmit}
         name="create-post-form"
       >
-        <textarea
-          className="textarea w-full p-0 text-lg input-style resize-none border-none focus:outline-none  border-gray-800"
-          placeholder="What is happening?!"
-          value={text}
-          onChange={(e) => setText(e.target.value)}
+        <AutoHeightTextarea
+          inputRef={newPostInputRef}
+          text={text}
+          textSetter={setText}
+          placeholder={"What is happening?!"}
         />
         {img && (
           <div className="relative w-72 mx-auto">
@@ -107,7 +119,14 @@ const CreatePost = () => {
           </div>
         )}
 
-        <div className="flex justify-between border-t py-2 border-t-gray-700">
+        <div
+          className={
+            "flex justify-between pt-2 " +
+            (textLength > 0
+              ? "border-t border-t-gray-700"
+              : "border-t border-transparent")
+          }
+        >
           <div className="flex gap-1 items-center">
             <CiImageOn
               className="fill-primary w-6 h-6 cursor-pointer"

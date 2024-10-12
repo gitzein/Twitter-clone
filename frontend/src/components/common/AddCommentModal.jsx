@@ -1,4 +1,4 @@
-import React, { useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { formatPostDate } from "../../utils/date";
 import { usePostComment } from "../../hooks/usePostComment";
 import { useQuery } from "@tanstack/react-query";
@@ -7,6 +7,7 @@ import { useNavigate } from "react-router-dom";
 import LoadingSpinner from "./LoadingSpinner";
 import { longStringChecker } from "../../utils/longStringChecker";
 import EmojiPicker from "./EmojiPicker";
+import AutoHeightTextarea from "./AutoHeightTextarea";
 
 function AddCommentModal({ post, feedType }) {
   const { data: authUser } = useQuery({ queryKey: ["authUser"] });
@@ -33,6 +34,12 @@ function AddCommentModal({ post, feedType }) {
     postComment(comment);
     setComment("");
   };
+
+  useEffect(() => {
+    commentInputRef.current.style.height = "auto";
+    commentInputRef.current.style.height =
+      commentInputRef.current.scrollHeight + "px";
+  }, [comment]);
 
   return (
     <>
@@ -132,7 +139,7 @@ function AddCommentModal({ post, feedType }) {
             </div>
 
             <form
-              className="flex gap-2 items-start pt-2  pb-8"
+              className="flex gap-2 items-start py-2"
               onSubmit={handlePostComment}
               name="comment-modal-form"
             >
@@ -148,17 +155,26 @@ function AddCommentModal({ post, feedType }) {
                   </div>
                 </div>
               </div>
-              <textarea
-                ref={commentInputRef}
-                className="textarea w-full p-0 rounded text-lg  resize-none outline-none"
-                placeholder="Add a comment..."
-                value={comment}
-                onChange={(e) => setComment(e.target.value)}
-              />
+
+              <div className="flex flex-1">
+                <AutoHeightTextarea
+                  inputRef={commentInputRef}
+                  text={comment}
+                  textSetter={setComment}
+                  placeholder={"Add a comment..."}
+                />
+              </div>
             </form>
           </div>
 
-          <div className="flex justify-between pt-2 items-center">
+          <div
+            className={
+              "flex justify-between pt-2 items-center " +
+              (commentLength > 0
+                ? "border-t border-t-gray-700"
+                : "border-t border-transparent")
+            }
+          >
             <div className="flex flex-1 items-center">
               <EmojiPicker setter={setComment} posClass={"dropdown-right"} />
             </div>

@@ -17,6 +17,7 @@ import { useRetweet } from "../../hooks/useRetweet";
 import { Link, useNavigate } from "react-router-dom";
 import DeleteComfirmationModal from "./DeleteComfirmationModal";
 import { longStringChecker } from "../../utils/longStringChecker";
+import { LineBreaker } from "../../utils/lineBreaker";
 
 const Post = ({ post, feedType, pageIndex, postIndex }) => {
   const { data: authUser } = useQuery({ queryKey: ["authUser"] });
@@ -171,11 +172,14 @@ const Post = ({ post, feedType, pageIndex, postIndex }) => {
             )}
           </div>
           <div className="flex flex-col gap-3 w-full">
-            <span
-              className={"" + (longStringChecker(post.text) && "break-all")}
+            <div
+              className={
+                "max-h-[35vh] overflow-auto " +
+                (longStringChecker(post.text) && "break-all")
+              }
             >
-              {post.text}
-            </span>
+              <LineBreaker string={post.text} />
+            </div>
             {post.img && (
               <img
                 src={post.img}

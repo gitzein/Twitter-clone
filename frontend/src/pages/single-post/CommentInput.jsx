@@ -1,17 +1,16 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import LoadingSpinner from "../../components/common/LoadingSpinner";
 import EmojiPicker from "../../components/common/EmojiPicker";
+import AutoHeightTextarea from "../../components/common/AutoHeightTextarea";
 
 function CommentInput({ postComment, isCommenting, authUser, inputRef }) {
   const [comment, setComment] = useState("");
-  const [commentError, setCommentError] = useState(false);
 
   const handlePostComment = (e) => {
     e.preventDefault();
     if (commentLimitReached) return;
     if (isCommenting) return;
     if (comment.trim() === "") {
-      setCommentError(true);
       setComment("");
       return;
     }
@@ -19,20 +18,19 @@ function CommentInput({ postComment, isCommenting, authUser, inputRef }) {
     setComment("");
   };
 
-  if (commentError) {
-    setTimeout(() => {
-      setCommentError(false);
-    }, 1500);
-  }
-
   const commentLength = comment.split("").length;
   const almostReachingCommentLimit =
     commentLength >= 270 && commentLength <= 280;
   const commentLimitReached = commentLength > 280;
 
+  useEffect(() => {
+    inputRef.current.style.height = "auto";
+    inputRef.current.style.height = inputRef.current.scrollHeight + "px";
+  }, [comment]);
+
   return (
     <form
-      className="flex items-start gap-2 p-4 border-b border-gray-600"
+      className="flex items-start gap-2 px-4 py-2 border-b border-gray-600"
       onSubmit={handlePostComment}
       name="comment-input-form"
     >
@@ -44,21 +42,20 @@ function CommentInput({ postComment, isCommenting, authUser, inputRef }) {
         </div>
       </div>
       <div className="flex flex-col flex-1 gap-4">
-        <textarea
-          ref={inputRef}
-          className={
-            "textarea w-full rounded text-lg p-0 resize-none focus:outline-none transition-all duration-300 " +
-            (commentError
-              ? "border border-red-500"
-              : "border border-transparent")
-          }
-          placeholder={
-            commentError ? "Can't be empty comment" : "Add a comment..."
-          }
-          value={comment}
-          onChange={(e) => setComment(e.target.value)}
+        <AutoHeightTextarea
+          inputRef={inputRef}
+          text={comment}
+          textSetter={setComment}
+          placeholder={"Add a comment..."}
         />
-        <div className="flex justify-between items-center">
+        <div
+          className={
+            "flex justify-between items-center pt-2 " +
+            (commentLength > 0
+              ? "border-t border-t-gray-700"
+              : "border-t border-transparent")
+          }
+        >
           <EmojiPicker
             setter={setComment}
             posClass={"dropdown-right dropdown-bottom"}

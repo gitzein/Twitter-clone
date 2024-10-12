@@ -3,6 +3,7 @@ import LoadingSpinner from "../../components/common/LoadingSpinner";
 import { FaRegBookmark, FaRegComment, FaRegHeart } from "react-icons/fa";
 import { BiRepost } from "react-icons/bi";
 import { longStringChecker } from "../../utils/longStringChecker";
+import { LineBreaker } from "../../utils/lineBreaker";
 
 function OptimisticNewPost({ authUser, text, img }) {
   return (
@@ -29,7 +30,7 @@ function OptimisticNewPost({ authUser, text, img }) {
         </div>
         <div className="flex flex-col gap-3 w-full">
           <span className={"" + (longStringChecker(text) && "break-all")}>
-            {text}
+            <LineBreaker string={text} />
           </span>
           {img && (
             <img

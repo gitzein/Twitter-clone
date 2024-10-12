@@ -1,11 +1,13 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import toast from "react-hot-toast";
 import { HiPencil } from "react-icons/hi2";
 import EmojiPicker from "./EmojiPicker";
+import AutoHeightTextarea from "./AutoHeightTextarea";
 
 function EditPostModal({ id, text, feedType, editType, postId }) {
   const queryClient = useQueryClient();
+  const editInputRef = useRef();
 
   const [newText, setNewText] = useState(text || "");
   const {
@@ -89,9 +91,20 @@ function EditPostModal({ id, text, feedType, editType, postId }) {
     if (editType === "comment") updateComment(newText);
   };
 
+  const newTextLength = newText.split("").length;
+  const almostReachingNewTextLimit =
+    newTextLength >= 270 && newTextLength <= 280;
+  const newTextLimitReached = newTextLength > 280;
+
   useEffect(() => {
     setNewText(text);
   }, [text]);
+
+  useEffect(() => {
+    editInputRef.current.style.height = "auto";
+    editInputRef.current.style.height =
+      editInputRef.current.scrollHeight + "px";
+  }, [newText]);
 
   return (
     <>
@@ -131,31 +144,54 @@ function EditPostModal({ id, text, feedType, editType, postId }) {
             onSubmit={handleSubmit}
             name="edit-modal-form"
           >
-            <textarea
-              className="flex-1 input border border-gray-700 rounded p-2 input-md"
-              value={newText}
-              name="editPost"
-              onChange={(e) => setNewText(e.target.value)}
-            />
             <div>
-              <EmojiPicker setter={setNewText} posClass={"dropdown-right"} />
+              <AutoHeightTextarea
+                inputRef={editInputRef}
+                text={newText}
+                textSetter={setNewText}
+              />
             </div>
-            <button
-              disabled={isUpdatingCommentError || isUpdatingPostError}
-              className={
-                "btn rounded-full btn-sm text-white " +
-                (isUpdatingCommentError || isUpdatingPostError
-                  ? "bg-red-500 hover:bg-red-600"
-                  : "btn-primary")
-              }
-              onClick={(e) => handleSubmit(e)}
-            >
-              {isUpdatingComment || isUpdatingPost
-                ? "Updating..."
-                : isUpdatingCommentError || isUpdatingPostError
-                ? updatePostError?.message || updateCommentError?.message
-                : "Update"}
-            </button>
+            <div className="flex flex-col gap-2 pt-2 border-t border-t-gray-700">
+              <div className="flex justify-between">
+                <EmojiPicker setter={setNewText} posClass={"dropdown-right"} />
+                {newTextLength > 0 && (
+                  <div
+                    className={
+                      "opacity-70 text-sm transition-all duration-300 " +
+                      (almostReachingNewTextLimit
+                        ? "text-yellow-500"
+                        : newTextLimitReached
+                        ? "text-red-500 font-bold"
+                        : "text-gray-500")
+                    }
+                  >
+                    {newTextLimitReached
+                      ? `-${newTextLength - 280}`
+                      : `${newTextLength}/280`}
+                  </div>
+                )}
+              </div>
+              <button
+                disabled={
+                  isUpdatingCommentError ||
+                  isUpdatingPostError ||
+                  newTextLimitReached
+                }
+                className={
+                  "btn rounded-full btn-sm text-white " +
+                  (isUpdatingCommentError || isUpdatingPostError
+                    ? "bg-red-500 hover:bg-red-600"
+                    : "btn-primary")
+                }
+                onClick={(e) => handleSubmit(e)}
+              >
+                {isUpdatingComment || isUpdatingPost
+                  ? "Updating..."
+                  : isUpdatingCommentError || isUpdatingPostError
+                  ? updatePostError?.message || updateCommentError?.message
+                  : "Update"}
+              </button>
+            </div>
           </form>
         </div>
         <form
@@ -165,11 +201,12 @@ function EditPostModal({ id, text, feedType, editType, postId }) {
         >
           <button
             className="outline-none bg-sky-200 opacity-20  min-h-[150vh]"
-            onClick={() =>
+            onClick={() => {
+              setNewText(text || "");
               document
                 .getElementById(`edit_${editType}_${feedType}_${id}`)
-                .close()
-            }
+                .close();
+            }}
           >
             close
           </button>

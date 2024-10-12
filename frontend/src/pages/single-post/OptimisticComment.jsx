@@ -2,6 +2,7 @@ import React from "react";
 import { longStringChecker } from "../../utils/longStringChecker";
 import { FaRegHeart } from "react-icons/fa";
 import LoadingSpinner from "../../components/common/LoadingSpinner";
+import { LineBreaker } from "../../utils/lineBreaker";
 
 function OptimisticComment({ textVar, userData }) {
   return (
@@ -29,7 +30,7 @@ function OptimisticComment({ textVar, userData }) {
         <div className="flex flex-1">
           <div className="text-sm flex flex-1 py-2">
             <span className={"" + (longStringChecker(textVar) && "break-all")}>
-              {textVar}
+              <LineBreaker string={textVar} />
             </span>
           </div>
           <div className="flex gap-1 items-center group cursor-pointer">

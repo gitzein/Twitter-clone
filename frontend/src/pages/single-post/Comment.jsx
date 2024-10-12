@@ -97,7 +97,7 @@ function Comment({ comment, feedType, postId }) {
   };
 
   return (
-    <>
+    <div className="flex gap-2 pt-2 pb-4 px-4 items-start border-b border-gray-600">
       <Link to={`/profile/${comment.from.username}`}>
         <div className="avatar">
           <div className="w-8 rounded-full">
@@ -171,30 +171,37 @@ function Comment({ comment, feedType, postId }) {
             <span
               className={"" + (longStringChecker(comment.text) && "break-all")}
             >
-              {comment.text}
+              {comment.text.split(/(?:\r\n|\r|\n)/g).map((line, i, arr) => (
+                <span key={i}>
+                  {line}
+                  {arr.length - 1 === i ? null : <br />}
+                </span>
+              ))}
             </span>
           </div>
-          <div
-            className="flex gap-1 items-center group cursor-pointer"
-            onClick={handleLikeComment}
-          >
-            {!isLiked ? (
-              <FaRegHeart className="w-4 h-4 cursor-pointer text-slate-500 group-hover:text-pink-500" />
-            ) : (
-              <FaHeart className="w-4 h-4 cursor-pointer text-pink-500 " />
-            )}
-
-            <span
-              className={`text-sm text-slate-500 group-hover:text-pink-500 ${
-                isLiked ? "text-pink-500" : ""
-              }`}
+          <div className="flex gap-1 items-center">
+            <div
+              className="flex gap-1 flex-col group cursor-pointer items-center"
+              onClick={handleLikeComment}
             >
-              {likesLength}
-            </span>
+              {!isLiked ? (
+                <FaRegHeart className="w-4 h-4 cursor-pointer text-slate-500 group-hover:text-pink-500" />
+              ) : (
+                <FaHeart className="w-4 h-4 cursor-pointer text-pink-500 " />
+              )}
+
+              <span
+                className={`text-sm text-slate-500 group-hover:text-pink-500 ${
+                  isLiked ? "text-pink-500" : ""
+                }`}
+              >
+                {likesLength}
+              </span>
+            </div>
           </div>
         </div>
       </div>
-    </>
+    </div>
   );
 }
 

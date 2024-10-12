@@ -1,7 +1,5 @@
 import XSvg from "../svgs/X";
 
-import { MdHome, MdHomeFilled } from "react-icons/md";
-import { IoNotifications } from "react-icons/io5";
 import {
   FaBell,
   FaBookmark,
@@ -21,8 +19,6 @@ const Sidebar = () => {
 
   const queryClient = useQueryClient();
   let location = useLocation();
-
-  console.log(location.pathname);
 
   const { data: unreadNotif } = useQuery({
     queryKey: ["unreadNotif"],
@@ -85,7 +81,7 @@ const Sidebar = () => {
           <li className="flex justify-center md:justify-start items-center">
             <Link
               to="/notifications"
-              className="flex gap-3 items-center hover:bg-stone-900 transition-all rounded-full duration-500 py-2 px-2 md:pl-2 md:pr-4  max-w-fit cursor-pointer"
+              className="flex gap-3 items-center hover:bg-stone-900 transition-all rounded-full duration-500 py-2 px-2 md:pl-2 md:pr-4 max-w-fit cursor-pointer"
             >
               {location.pathname === "/notifications" ? (
                 <FaBell className={"w-7 h-7 "} />
