@@ -42,12 +42,15 @@ const likeOrUnlikePost = async (req, res) => {
     // Unlike
     const likedPostIndex = user.likedPosts.indexOf(postId);
     post.likes.splice(isPostLiked, 1);
-    user.likedPosts.splice(likedPostIndex, 1);
+
+    if (user._id != post.user.toString()) {
+      user.likedPosts.splice(likedPostIndex, 1);
+    }
   } else {
     // Like
     post.likes.push(user._id);
-    user.likedPosts.push(postId);
     if (user._id != post.user.toString()) {
+      user.likedPosts.push(postId);
       const notification = new Notification({
         from: user._id,
         to: post.user,
@@ -259,7 +262,7 @@ const getLikedPosts = async (req, res) => {
 
 const getLikedPostsPaginated = async (req, res) => {
   const userId = req.params.id;
-  const { cursor, limit = 10 } = req.query;
+  const { cursor = 0, limit = 10 } = req.query;
 
   const isValidObjectId = mongoose.isObjectIdOrHexString(userId);
   if (!isValidObjectId)
@@ -299,16 +302,46 @@ const getLikedPostsPaginated = async (req, res) => {
     { $unwind: "$user" },
   ]);
 
-  const prevCursor =
+  let prevCursor =
     cursor && likedPosts.length > 0
       ? likedPostsIdsLookup.indexOf(likedPosts[0]._id.toString())
       : null;
-  const nextCursor =
+  let nextCursor =
     likedPosts.length > 0
       ? likedPostsIdsLookup.indexOf(
           likedPosts[likedPosts.length - 1]._id.toString()
         ) + 1
       : null;
+
+  const queriedIds = likedPostsArr.slice(cursor, nextCursor);
+  const idsOfStillExistLikedPosts = likedPosts.map((post) => post._id);
+
+  // Filtering the no longger exist liked post (if there's any) from user's likedPosts array
+
+  if (queriedIds.length !== idsOfStillExistLikedPosts.length) {
+    likedPostsArr.splice(
+      Number(cursor),
+      queriedIds.length,
+      ...idsOfStillExistLikedPosts
+    );
+    const newIdsOfStillExistLikedPosts = likedPostsArr.map((id) =>
+      id.toString()
+    );
+
+    prevCursor =
+      cursor && likedPosts.length > 0
+        ? newIdsOfStillExistLikedPosts.indexOf(likedPosts[0]._id.toString())
+        : null;
+    nextCursor =
+      likedPosts.length > 0
+        ? newIdsOfStillExistLikedPosts.indexOf(
+            likedPosts[likedPosts.length - 1]._id.toString()
+          ) + 1
+        : null;
+
+    user.likedPosts = [...likedPostsArr].reverse();
+    await user.save();
+  }
 
   res.json({
     posts: likedPosts,
@@ -627,9 +660,14 @@ const getSavedPosts = async (req, res) => {
 };
 
 const getSavedPostsPaginated = async (req, res) => {
-  const { cursor, limit = 10 } = req.query;
+  const { cursor = 0, limit = 10 } = req.query;
+  const userId = req.user._id;
+  const user = await User.findById(userId).exec();
 
-  const savedPostsArr = req.user.savedPosts;
+  if (!user) return res.status(400).json({ message: "User not found" });
+
+  const savedPostsArr = user.savedPosts;
+
   const savedPostsIdsLookup = savedPostsArr.map((id) => id.toString());
 
   let order = [...savedPostsArr];
@@ -659,16 +697,46 @@ const getSavedPostsPaginated = async (req, res) => {
     { $unwind: "$user" },
   ]);
 
-  const prevCursor =
+  let prevCursor =
     cursor && savedPosts.length > 0
       ? savedPostsIdsLookup.indexOf(savedPosts[0]._id.toString())
       : null;
-  const nextCursor =
+  let nextCursor =
     savedPosts.length > 0
       ? savedPostsIdsLookup.indexOf(
           savedPosts[savedPosts.length - 1]._id.toString()
         ) + 1
       : null;
+
+  const queriedIds = savedPostsArr.slice(cursor, nextCursor);
+  const idsOfStillExistSavedPosts = savedPosts.map((post) => post._id);
+
+  // Filtering the no longger exist saved post (if there's any) from user's savedPosts array
+
+  if (queriedIds.length !== idsOfStillExistSavedPosts.length) {
+    savedPostsArr.splice(
+      Number(cursor),
+      queriedIds.length,
+      ...idsOfStillExistSavedPosts
+    );
+    const newIdsOfStillExistSavedPosts = savedPostsArr.map((id) =>
+      id.toString()
+    );
+
+    prevCursor =
+      cursor && savedPosts.length > 0
+        ? newIdsOfStillExistSavedPosts.indexOf(savedPosts[0]._id.toString())
+        : null;
+    nextCursor =
+      savedPosts.length > 0
+        ? newIdsOfStillExistSavedPosts.indexOf(
+            savedPosts[savedPosts.length - 1]._id.toString()
+          ) + 1
+        : null;
+
+    user.savedPosts = [...savedPostsArr];
+    await user.save();
+  }
 
   res.json({
     posts: savedPosts,

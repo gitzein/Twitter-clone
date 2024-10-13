@@ -15,7 +15,7 @@ const Posts = ({ feedType, username, userId }) => {
     case "following":
       POST_ENDPOINT = "/api/posts/following";
       break;
-    case "posts":
+    case "user":
       POST_ENDPOINT = `/api/posts/user/${username}`;
       break;
     case "likes":
@@ -34,6 +34,7 @@ const Posts = ({ feedType, username, userId }) => {
     fetchNextPage,
     isFetchingNextPage,
     hasNextPage,
+    isFetching,
   } = useInfiniteQuery({
     queryKey: ["posts", feedType],
     queryFn: async ({ pageParam }) => {
@@ -70,17 +71,14 @@ const Posts = ({ feedType, username, userId }) => {
 
   return (
     <div className="max-w-100%">
-      {status === "pending" && (
+      {(status === "pending" || isFetching) && feedType !== "forYou" && (
         <div className="flex flex-col justify-center">
           <PostSkeleton />
           <PostSkeleton />
           <PostSkeleton />
         </div>
       )}
-      {status !== "pending" && posts.pages.length === 0 && (
-        <p className="text-center my-4">No posts in this tab</p>
-      )}
-      {status !== "pending" && posts.pages.length !== 0 && (
+      {(status !== "pending" || !isFetching) && posts.pages.length !== 0 && (
         <div>
           {posts.pages.map((page) => {
             return (

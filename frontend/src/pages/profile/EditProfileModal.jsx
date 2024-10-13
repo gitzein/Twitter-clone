@@ -183,7 +183,7 @@ const EditProfileModal = ({ authUser }) => {
             <button
               disabled={currPwErr}
               className={
-                "btn rounded-full btn-sm text-white " +
+                "btn rounded-full btn-sm text-white transition-all duration-500 " +
                 (showErrMsg ? "bg-red-500 hover:bg-red-600" : "btn-primary")
               }
             >
@@ -200,7 +200,22 @@ const EditProfileModal = ({ authUser }) => {
           className="modal-backdrop"
           name="close-edit-profile-form"
         >
-          <button className="outline-none">close</button>
+          <button
+            className="outline-none"
+            onClick={() =>
+              setFormData({
+                fullName: authUser?.fullName,
+                username: authUser?.username,
+                email: authUser?.email,
+                bio: authUser?.bio,
+                link: authUser?.link,
+                newPassword: "",
+                currentPassword: "",
+              })
+            }
+          >
+            close
+          </button>
         </form>
       </dialog>
     </>

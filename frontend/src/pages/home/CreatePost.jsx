@@ -46,7 +46,7 @@ const CreatePost = () => {
       }
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["posts"] });
+      queryClient.invalidateQueries({ queryKey: ["posts", "forYou"] });
       setText("");
       setImg(null);
       toast.success("Posted!");
@@ -85,7 +85,7 @@ const CreatePost = () => {
   }, [text]);
 
   return (
-    <div className="flex px-4 py-2 items-start gap-4 border-b border-gray-700">
+    <div className="flex px-4 py-2 mt-2 items-start gap-4 border-b border-gray-700">
       <div className="avatar">
         <div className="w-8 rounded-full">
           <img src={data?.profileImg || "/avatar-placeholder.png"} />

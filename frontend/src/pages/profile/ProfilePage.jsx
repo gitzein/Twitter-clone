@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 
 import Posts from "../../components/common/Posts";
@@ -21,7 +21,7 @@ const ProfilePage = () => {
   const [coverImg, setCoverImg] = useState(null);
   const [profileImg, setProfileImg] = useState(null);
   const [isImgSizeAllowed, setIsImgSizeAllowed] = useState(true);
-  const [feedType, setFeedType] = useState("posts");
+  const [feedType, setFeedType] = useState("user");
   const { username } = useParams();
 
   const queryClient = useQueryClient();
@@ -284,12 +284,12 @@ const ProfilePage = () => {
                 <div
                   className={
                     "flex justify-center flex-1 p-3 hover:bg-secondary transition duration-300 relative cursor-pointer " +
-                    (feedType !== "posts" && "text-slate-500")
+                    (feedType !== "user" && "text-slate-500")
                   }
-                  onClick={() => setFeedType("posts")}
+                  onClick={() => setFeedType("user")}
                 >
                   Posts
-                  {feedType === "posts" && (
+                  {feedType === "user" && (
                     <div className="absolute bottom-0 w-10 h-1 rounded-full bg-primary" />
                   )}
                 </div>

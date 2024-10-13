@@ -7,9 +7,6 @@ import OptimisticNewPost from "./OptimisticNewPost";
 
 const HomePage = () => {
   const [feedType, setFeedType] = useState("forYou");
-  const [varText, setVarText] = useState("");
-  const [varImg, setVarImg] = useState("");
-  const [showOptimisticPost, setShowOptimisticPost] = useState(false);
 
   const { data: authUser } = useQuery({ queryKey: ["authUser"] });
 
@@ -18,20 +15,6 @@ const HomePage = () => {
     select: (mutation) => mutation.state.variables,
   });
 
-  useEffect(() => {
-    if (variables.length !== 0) {
-      setShowOptimisticPost(true);
-      setVarText(variables[0].text);
-      setVarImg(variables[0].img);
-    }
-    if (variables.length === 0) {
-      setTimeout(() => {
-        setShowOptimisticPost(false);
-        setVarText("");
-        setVarImg("");
-      }, 500);
-    }
-  }, [variables]);
   return (
     <>
       <div className="flex-[4_4_0] mr-auto border-r border-gray-700 min-h-screen">
@@ -64,12 +47,12 @@ const HomePage = () => {
 
         <CreatePost />
         <div className=" mb-4 w-full"></div>
-        {showOptimisticPost && (
+        {variables.length !== 0 && (
           <div className="opacity-50 showAnimation">
             <OptimisticNewPost
               authUser={authUser}
-              text={varText}
-              img={varImg}
+              text={variables[0].text}
+              img={variables[0].img}
             />
           </div>
         )}
