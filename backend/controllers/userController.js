@@ -224,6 +224,25 @@ const getUserFollowers = async (req, res) => {
   res.json(userFollowers);
 };
 
+const getSearchedUser = async (req, res) => {
+  const { search } = req.query;
+
+  const query = {
+    $or: [
+      { username: { $regex: `${search}`, $options: "i" } },
+      { fullName: { $regex: `${search}`, $options: "i" } },
+    ],
+  };
+
+  const result = await User.find(query)
+    .select("username fullName profileImg _id")
+    .limit(10)
+    .lean()
+    .exec();
+
+  res.json(result);
+};
+
 module.exports = {
   getUserProfile,
   followOrUnfollowUser,
@@ -231,4 +250,5 @@ module.exports = {
   updateUser,
   getUserFollowing,
   getUserFollowers,
+  getSearchedUser,
 };

@@ -87,6 +87,7 @@ function EditPostModal({ id, text, feedType, editType, postId }) {
 
   const handleSubmit = (e) => {
     e.preventDefault();
+    if (newText.trim() === "") return;
     if (editType === "post") updatePost(newText);
     if (editType === "comment") updateComment(newText);
   };
@@ -175,7 +176,8 @@ function EditPostModal({ id, text, feedType, editType, postId }) {
                 disabled={
                   isUpdatingCommentError ||
                   isUpdatingPostError ||
-                  newTextLimitReached
+                  newTextLimitReached ||
+                  newText.trim() === ""
                 }
                 className={
                   "btn rounded-full btn-sm text-white " +

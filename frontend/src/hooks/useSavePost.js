@@ -28,6 +28,7 @@ export const useSavePost = () => {
       queryClient.setQueryData(["authUser"], (oldData) => {
         return { ...oldData, savedPosts: newData };
       });
+      queryClient.invalidateQueries({ queryKey: ["posts", "save"] });
     },
   });
 

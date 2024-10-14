@@ -1,10 +1,22 @@
 import { Link } from "react-router-dom";
 import RightPanelSkeleton from "../skeletons/RightPanelSkeleton";
-import { useQuery } from "@tanstack/react-query";
 import { useFollow } from "../../hooks/useFollow";
 import LoadingSpinner from "./LoadingSpinner";
+import SearchBar from "./SearchBar";
+import { useRef, useState } from "react";
+import SearchList from "./SearchList";
+import { useQuery } from "@tanstack/react-query";
+import useOutsideClick from "../../hooks/useOutsideClick";
+import Search from "./Search";
 
 const RightPanel = () => {
+  const [searchParam, setSearchParam] = useState("");
+  const [focusSearch, setFocusSearch] = useState(false);
+
+  const searchRef = useRef();
+
+  useOutsideClick(searchRef, () => setFocusSearch(false));
+
   const { data: suggestedUsers, isLoading } = useQuery({
     queryKey: ["suggestedUsers"],
     queryFn: async () => {
@@ -21,15 +33,22 @@ const RightPanel = () => {
 
   const { follow, isPending } = useFollow();
 
-  if (suggestedUsers?.length === 0) return <div className="md:w-64 w-0"></div>;
+  if (suggestedUsers?.length === 0) return <div className="lg:w-64 w-0"></div>;
 
   return (
     <>
       <div className="w-[5vw] md:w-[15vw] lg:hidden"></div>
-      <div className="hidden lg:block my-4 mx-2 ">
-        <div className="bg-[#16181C] p-4 rounded-md sticky top-2 min-w-72">
-          <p className="font-bold">Who to follow</p>
-          <div className="flex flex-col gap-4">
+      <div className="hidden lg:block mx-2">
+        <Search
+          searchRef={searchRef}
+          searchParam={searchParam}
+          setSearchParam={setSearchParam}
+          focusSearch={focusSearch}
+          setFocusSearch={setFocusSearch}
+        />
+        <div className="bg-transparent py-3 my-2 border flex flex-col border-gray-700 rounded-xl min-w-72">
+          <p className="font-bold text-lg pb-2 px-3">Who to follow</p>
+          <div className="flex flex-col">
             {/* item */}
             {isLoading && (
               <>
@@ -43,16 +62,12 @@ const RightPanel = () => {
               suggestedUsers?.map((user) => (
                 <Link
                   to={`/profile/${user.username}`}
-                  className="flex items-center justify-between gap-4"
+                  className="flex items-center justify-between p-3 hover:bg-neutral-950"
                   key={user._id}
                 >
                   <div className="flex gap-2 items-center">
-                    <div className="avatar">
-                      <div className="w-8 rounded-full">
-                        <img
-                          src={user.profileImg || "/avatar-placeholder.png"}
-                        />
-                      </div>
+                    <div className="w-8 rounded-full overflow-hidden">
+                      <img src={user.profileImg || "/avatar-placeholder.png"} />
                     </div>
                     <div className="flex flex-col">
                       <span className="font-semibold tracking-tight truncate w-28">

@@ -118,7 +118,7 @@ function AddCommentModal({ post, feedType }) {
                   </div>
                 </div>
                 <div>
-                  <div className="flex flex-col gap-3 overflow-hidden px-2 cursor-pointer">
+                  <div className="flex flex-col gap-3 overflow-hidden px-0 cursor-pointer">
                     <span
                       className={
                         "" + (longStringChecker(post.text) && "break-all")
