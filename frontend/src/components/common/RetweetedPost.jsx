@@ -39,8 +39,8 @@ function RetweetedPost({ post, feedType, pageIndex, postIndex }) {
         )}
       </div>
       {!post.postReference ? (
-        <div className="w-full p-4 border-b border-gray-700  mb-4">
-          <p className="text-center border border-gray-700 py-6 mb-2">
+        <div className="w-full p-4 border-b border-neutral-700  mb-4">
+          <p className="text-center border border-neutral-700 py-6 mb-2">
             This post no longer exist
           </p>
         </div>

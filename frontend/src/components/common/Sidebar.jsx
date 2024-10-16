@@ -60,7 +60,7 @@ const Sidebar = ({ setShowBar, showSearch }) => {
 
   return (
     <div className="lg:flex-[2_2_0] w-18 max-w-52">
-      <div className="sticky top-0 left-0 h-screen flex flex-col border-r border-gray-700 w-20 lg:w-full">
+      <div className="sticky top-0 left-0 h-screen flex flex-col border-r border-neutral-700 w-20 lg:w-full">
         <Link to="/" className="flex justify-center lg:justify-start">
           <XSvg className="px-2 w-12 h-12 rounded-full fill-white hover:bg-stone-900" />
         </Link>

@@ -1,10 +1,8 @@
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import RightPanelSkeleton from "../skeletons/RightPanelSkeleton";
 import { useFollow } from "../../hooks/useFollow";
 import LoadingSpinner from "./LoadingSpinner";
-import SearchBar from "./SearchBar";
 import { useRef, useState } from "react";
-import SearchList from "./SearchList";
 import { useQuery } from "@tanstack/react-query";
 import useOutsideClick from "../../hooks/useOutsideClick";
 import Search from "./Search";
@@ -14,6 +12,8 @@ const RightPanel = () => {
   const [focusSearch, setFocusSearch] = useState(false);
 
   const searchRef = useRef();
+
+  let location = useLocation();
 
   useOutsideClick(searchRef, () => setFocusSearch(false));
 
@@ -33,8 +33,6 @@ const RightPanel = () => {
 
   const { follow, isPending } = useFollow();
 
-  if (suggestedUsers?.length === 0) return <div className="lg:w-64 w-0"></div>;
-
   return (
     <>
       <div className="w-[5vw] md:w-[15vw] lg:hidden"></div>
@@ -46,28 +44,35 @@ const RightPanel = () => {
           focusSearch={focusSearch}
           setFocusSearch={setFocusSearch}
         />
-        <div className="bg-transparent py-3 my-2 border flex flex-col border-gray-700 rounded-xl min-w-72">
-          <p className="font-bold text-lg pb-2 px-3">Who to follow</p>
-          <div className="flex flex-col">
-            {/* item */}
-            {isLoading && (
-              <>
-                <RightPanelSkeleton />
-                <RightPanelSkeleton />
-                <RightPanelSkeleton />
-                <RightPanelSkeleton />
-              </>
-            )}
-            {!isLoading &&
-              suggestedUsers?.map((user) => (
+        {isLoading && (
+          <div className="bg-transparent py-3 my-2 border flex flex-col border-neutral-700 rounded-xl min-w-80">
+            <p className="font-bold text-lg pb-2 px-3">Who to follow</p>
+            <div className="flex flex-col">
+              <RightPanelSkeleton />
+              <RightPanelSkeleton />
+              <RightPanelSkeleton />
+              <RightPanelSkeleton />
+            </div>
+          </div>
+        )}
+        {suggestedUsers?.length !== 0 &&
+        !isLoading &&
+        location.pathname !== "/connect" ? (
+          <div className="bg-transparent pt-3 my-2 border flex flex-col border-neutral-700 rounded-2xl min-w-80 overflow-hidden">
+            <p className="font-bold text-lg pb-2 px-3">Who to follow</p>
+            <div className="flex flex-col">
+              {suggestedUsers.map((user) => (
                 <Link
                   to={`/profile/${user.username}`}
                   className="flex items-center justify-between p-3 hover:bg-neutral-950"
                   key={user._id}
                 >
                   <div className="flex gap-2 items-center">
-                    <div className="w-8 rounded-full overflow-hidden">
-                      <img src={user.profileImg || "/avatar-placeholder.png"} />
+                    <div className="w-8 rounded-full overflow-hidden  aspect-square">
+                      <img
+                        src={user.profileImg || "/avatar-placeholder.png"}
+                        className="w-full h-full object-cover"
+                      />
                     </div>
                     <div className="flex flex-col">
                       <span className="font-semibold tracking-tight truncate w-28">
@@ -91,8 +96,16 @@ const RightPanel = () => {
                   </div>
                 </Link>
               ))}
+            </div>
+            {suggestedUsers.length > 2 && (
+              <Link to={"connect"} className="w-full hover:bg-neutral-950 px-3">
+                <div className="text-primary pt-3 pb-4">Show more</div>
+              </Link>
+            )}
           </div>
-        </div>
+        ) : (
+          <div className="lg:w-72 w-0"></div>
+        )}
       </div>
     </>
   );

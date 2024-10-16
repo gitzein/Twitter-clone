@@ -27,6 +27,7 @@ import OptimisticComment from "./OptimisticComment";
 import { useSavePost } from "../../hooks/useSavePost";
 import CommentInput from "./CommentInput";
 import { LineBreaker } from "../../utils/lineBreaker";
+import useThrottle from "../../hooks/useThrottle";
 
 function SinglePost() {
   const { id: postId } = useParams();
@@ -78,9 +79,11 @@ function SinglePost() {
 
   const { likePost, likingPending } = useLikePost(postId, "post", postId);
 
+  const throttledLike = useThrottle(likePost, 500);
+
   const handleLikePost = () => {
     if (likingPending) return;
-    likePost(postId);
+    throttledLike(postId);
   };
 
   if (likingPending) {
@@ -102,10 +105,12 @@ function SinglePost() {
 
   const { savePost, isSavingPost } = useSavePost();
 
+  const throttledSave = useThrottle(savePost, 500);
+
   const handleSavePost = (e) => {
     e.preventDefault();
     if (isSavingPost) return;
-    savePost(postId);
+    throttledSave(postId);
   };
 
   if (isSavingPost) {
@@ -113,9 +118,9 @@ function SinglePost() {
   }
 
   return (
-    <div className="flex-[4_4_0]  border-r border-gray-700 ">
-      <div className="flex gap-10 px-4 py-2 items-center">
-        <Link to={-1}>
+    <div className="flex-[4_4_0]">
+      <div className="flex gap-10 px-4 py-2 items-center sticky top-0 bg-[rgb(0,0,0,0.6)] backdrop-blur-md z-40">
+        <Link to={-1} className="p-3 rounded-full hover:bg-neutral-900">
           <FaArrowLeft className="w-4 h-4" />
         </Link>
         <div className="flex flex-col">
@@ -135,7 +140,7 @@ function SinglePost() {
       )}
       {!isLoading && !isError && post && (
         <>
-          <div className="flex gap-4 items-start p-4 border-b border-gray-700">
+          <div className="flex gap-4 items-start p-4 border-b border-neutral-700">
             <Link to={`/profile/${postOwner.username}`}>
               <div className="avatar">
                 <div className="w-12 rounded-full overflow-hidden">
@@ -219,7 +224,7 @@ function SinglePost() {
                 {post.img && (
                   <img
                     src={post.img}
-                    className="h-80 object-contain rounded-lg border border-gray-700"
+                    className="h-80 object-contain rounded-lg border border-neutral-700"
                     alt=""
                   />
                 )}
@@ -314,7 +319,7 @@ function SinglePost() {
               </p>
             )}
             {isCommenting && (
-              <div className="flex gap-2 pt-2 pb-4 px-4 opacity-50 items-center border-b border-gray-600 showAnimation">
+              <div className="flex gap-2 pt-2 pb-4 px-4 opacity-50 items-center border-b border-neutral-600 showAnimation">
                 <OptimisticComment textVar={variables} userData={authUser} />
               </div>
             )}

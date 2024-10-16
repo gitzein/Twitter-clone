@@ -7,7 +7,7 @@ import { LineBreaker } from "../../utils/lineBreaker";
 
 function OptimisticNewPost({ authUser, text, img }) {
   return (
-    <div className="flex gap-2 items-start border-b border-gray-700 px-4 pb-4 mb-4 transition-all duration-300 hover:bg-neutral-950">
+    <div className="flex gap-2 items-start border-b border-neutral-700 px-4 pb-4 mb-4 transition-all duration-300 hover:bg-neutral-950">
       <div className="avatar cursor-wait">
         <div className="w-8 rounded-full overflow-hidden">
           <img src={authUser.profileImg || "/avatar-placeholder.png"} />
@@ -35,7 +35,7 @@ function OptimisticNewPost({ authUser, text, img }) {
           {img && (
             <img
               src={img}
-              className="h-80 object-contain rounded-lg border border-gray-700"
+              className="h-80 object-contain rounded-lg border border-neutral-700"
               alt=""
             />
           )}

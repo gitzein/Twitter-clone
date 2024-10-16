@@ -15,6 +15,7 @@ router.get(
   userController.getUserFollowers
 );
 router.get("/suggested", protectRoute, userController.getSuggestedUser);
+router.get("/connect", protectRoute, userController.getAllSuggestedUser);
 router.get("/search", protectRoute, userController.getSearchedUser);
 router.post("/follow/:id", protectRoute, userController.followOrUnfollowUser);
 router.post("/update", protectRoute, userController.updateUser);

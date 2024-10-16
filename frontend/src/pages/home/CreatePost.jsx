@@ -5,6 +5,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import toast from "react-hot-toast";
 import EmojiPicker from "../../components/common/EmojiPicker";
 import AutoHeightTextarea from "../../components/common/AutoHeightTextarea";
+import { Link } from "react-router-dom";
 
 const CreatePost = () => {
   const [text, setText] = useState("");
@@ -85,12 +86,15 @@ const CreatePost = () => {
   }, [text]);
 
   return (
-    <div className="flex px-4 py-2 mt-2 items-start gap-4 border-b border-gray-700">
-      <div className="avatar">
-        <div className="w-8 rounded-full">
-          <img src={data?.profileImg || "/avatar-placeholder.png"} />
+    <div className="flex px-4 py-2 mt-2 items-start justify-between gap-2 border-b border-neutral-700">
+      <Link to={`/profile/${data?.username}`}>
+        <div className="w-9 h-9 rounded-full overflow-hidden  aspect-square">
+          <img
+            src={data?.profileImg || "/avatar-placeholder.png"}
+            className="object-cover w-full h-full"
+          />
         </div>
-      </div>
+      </Link>
       <form
         className="flex flex-col gap-2 w-full"
         onSubmit={handleSubmit}

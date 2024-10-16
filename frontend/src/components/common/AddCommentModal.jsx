@@ -60,7 +60,7 @@ function AddCommentModal({ post, feedType }) {
         id={`comments_modal_${postId}`}
         className="modal overflow-y-auto border-none outline-none"
       >
-        <div className="modal-box overflow-y-visible  min-h-fit self-start mt-[5vh] px-4 py-2 rounded-2xl border flex flex-col justify-between border-gray-700 ">
+        <div className="modal-box overflow-y-visible  min-h-fit self-start mt-[5vh] px-4 py-2 rounded-2xl border flex flex-col justify-between border-neutral-700 ">
           <div className="flex pt-2 pb-4 font-bold">
             <button
               onClick={() => {
@@ -129,7 +129,7 @@ function AddCommentModal({ post, feedType }) {
                     {post.img && (
                       <img
                         src={post.img}
-                        className="h-80 object-contain rounded-lg border border-gray-700"
+                        className="h-80 object-contain rounded-lg border border-neutral-700"
                         alt=""
                       />
                     )}

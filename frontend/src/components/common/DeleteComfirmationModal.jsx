@@ -19,7 +19,7 @@ function DeleteComfirmationModal({ id, func, type }) {
         id={`delete_${type}_modal_${id}`}
         className="modal cursor-default"
       >
-        <div className="modal-box w-4/5 md:w-1/4 flex flex-col gap-6 max-w-5xl px-7 py-8 border border-gray-700 rounded-2xl">
+        <div className="modal-box w-4/5 md:w-1/4 flex flex-col gap-6 max-w-5xl px-7 py-8 border border-neutral-700 rounded-2xl">
           <div className="flex flex-col gap-2">
             <h3 className="font-bold text-xl">{`Delete ${type}?`}</h3>
             <p className="text-gray-500 text-base">
@@ -39,7 +39,7 @@ function DeleteComfirmationModal({ id, func, type }) {
             </button>
             {/* if there is a button, it will close the modal */}
             <button
-              className=" w-full text-base font-bold py-2 transition-all duration-300 border border-gray-700 rounded-full hover:bg-secondary"
+              className=" w-full text-base font-bold py-2 transition-all duration-300 border border-neutral-700 rounded-full hover:bg-secondary"
               onClick={() =>
                 document.getElementById(`delete_${type}_modal_${id}`).close()
               }

@@ -9,6 +9,8 @@ function FollowingPage({ followType }) {
   const [followInfo, setFollowInfo] = useState(`${followType}`);
   const { username } = useParams();
 
+  const { data: user } = useQuery({ queryKey: ["userProfile", username] });
+
   const {
     data: following,
     isLoading,
@@ -42,39 +44,44 @@ function FollowingPage({ followType }) {
   }, [followInfo, username, refetch]); */
 
   return (
-    <div className="flex-[4_4_0] justify-center border-l border-r border-gray-700 min-h-screen">
-      <div className="flex gap-4 px-4 py-4 items-center">
-        <Link to={-1} className="p-2">
-          <FaArrowLeft className="w-4 h-4" />
-        </Link>
-        <Link to={`/profile/${username}`}>
-          <p className="font-bold text-lg">@{username}</p>
-        </Link>
-      </div>
-      <div className="flex w-full border-b border-gray-700 mt-4">
-        <div
-          className={
-            "flex justify-center flex-1 p-3 hover:bg-secondary transition duration-300 relative cursor-pointer " +
-            (followInfo !== "following" && "text-slate-500")
-          }
-          onClick={() => setFollowInfo("following")}
-        >
-          Following
-          {followInfo === "following" && (
-            <div className="absolute bottom-0 w-10 h-1 rounded-full bg-primary" />
-          )}
+    <div className="flex-[4_4_0] justify-center">
+      <div className="sticky top-0 bg-[rgb(0,0,0,0.6)] backdrop-blur-md z-40">
+        <div className="flex gap-4 px-4 py-1 items-center">
+          <Link to={-1} className="p-3 rounded-full hover:bg-neutral-900">
+            <FaArrowLeft className="w-4 h-4" />
+          </Link>
+          <Link to={`/profile/${user.username}`}>
+            <div className="flex flex-col items-start ">
+              <span className="font-bold text-xl">{user.fullName}</span>
+              <span className="text-neutral-500 text-xs">@{user.username}</span>
+            </div>
+          </Link>
         </div>
-        <div
-          className={
-            "flex justify-center flex-1 p-3 hover:bg-secondary transition duration-300 relative cursor-pointer " +
-            (followInfo !== "followers" && "text-slate-500")
-          }
-          onClick={() => setFollowInfo("followers")}
-        >
-          Followers
-          {followInfo === "followers" && (
-            <div className="absolute bottom-0 w-10  h-1 rounded-full bg-primary" />
-          )}
+        <div className="flex w-full border-b border-neutral-700">
+          <div
+            className={
+              "flex justify-center flex-1 p-4 hover:bg-[rgb(78,78,78,0.4)] transition duration-300 relative cursor-pointer " +
+              (followInfo !== "following" && "text-slate-500")
+            }
+            onClick={() => setFollowInfo("following")}
+          >
+            Following
+            {followInfo === "following" && (
+              <div className="absolute bottom-0 w-10 h-1 rounded-full bg-primary" />
+            )}
+          </div>
+          <div
+            className={
+              "flex justify-center flex-1 p-4 hover:bg-[rgb(78,78,78,0.4)] transition duration-300 relative cursor-pointer " +
+              (followInfo !== "followers" && "text-slate-500")
+            }
+            onClick={() => setFollowInfo("followers")}
+          >
+            Followers
+            {followInfo === "followers" && (
+              <div className="absolute bottom-0 w-10  h-1 rounded-full bg-primary" />
+            )}
+          </div>
         </div>
       </div>
       {isLoading && (
@@ -90,7 +97,7 @@ function FollowingPage({ followType }) {
       {following &&
         following.map((user) => (
           <Link to={`/profile/${user.username}`} key={user._id}>
-            <div className="flex min-h-20 items-center justify-between gap-2 p-4 border-b border-gray-700 transition duration-300 hover:bg-secondary">
+            <div className="flex min-h-20 items-center justify-between gap-2 p-4 border-b border-neutral-700 transition duration-300 hover:bg-secondary">
               <div className="flex flex-1 items-center gap-2">
                 <div className="avatar">
                   <div className="w-8 rounded-full">

@@ -30,7 +30,7 @@ function CommentInput({ postComment, isCommenting, authUser, inputRef }) {
 
   return (
     <form
-      className="flex items-start gap-2 px-4 py-2 border-b border-gray-600"
+      className="flex items-start gap-2 px-4 py-2 border-b border-neutral-600"
       onSubmit={handlePostComment}
       name="comment-input-form"
     >

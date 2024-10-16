@@ -45,13 +45,15 @@ function SearchList({ searchParam }) {
                         />
                       </div>
                     </div>
-                    <div className="flex flex-col flex-1 items-start text-sm w-full">
-                      <span className="font-bold">@{result.username}</span>
-                      <span className="text-gray-500 truncate">
+                    <div className="flex flex-col flex-1 items-start text-sm overflow-x-hidden">
+                      <span className="font-bold truncate w-[80%]">
+                        @{result.username}
+                      </span>
+                      <span className="text-gray-500  truncate w-[80%]">
                         {result.fullName}
                       </span>
                       {authUser?.following.includes(result._id) && (
-                        <span className="text-gray-500 truncate flex gap-1 items-center">
+                        <span className="text-gray-500 flex gap-1 items-center">
                           <FaUser className={"w-[0.625rem] h-[0.625rem] "} />
                           Following
                         </span>

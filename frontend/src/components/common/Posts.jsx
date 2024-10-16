@@ -71,7 +71,7 @@ const Posts = ({ feedType, username, userId }) => {
 
   return (
     <div className="max-w-100%">
-      {(status === "pending" || isFetching) && feedType !== "forYou" && (
+      {(status === "pending" || isFetching) && (
         <div className="flex flex-col justify-center">
           <PostSkeleton />
           <PostSkeleton />
@@ -101,7 +101,7 @@ const Posts = ({ feedType, username, userId }) => {
               </div>
             );
           })}
-          <div ref={ref} className="mb-[30vh] w-full flex justify-center">
+          <div ref={ref} className="pb-[30vh] w-full flex justify-center">
             {isFetchingNextPage ? (
               <LoadingSpinner size="lg" />
             ) : !hasNextPage ? (

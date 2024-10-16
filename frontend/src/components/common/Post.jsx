@@ -18,6 +18,7 @@ import { Link, useNavigate } from "react-router-dom";
 import DeleteComfirmationModal from "./DeleteComfirmationModal";
 import { longStringChecker } from "../../utils/longStringChecker";
 import { LineBreaker } from "../../utils/lineBreaker";
+import useThrottle from "../../hooks/useThrottle";
 
 const Post = ({ post, feedType, pageIndex, postIndex }) => {
   const { data: authUser } = useQuery({ queryKey: ["authUser"] });
@@ -50,10 +51,12 @@ const Post = ({ post, feedType, pageIndex, postIndex }) => {
     postIndex
   );
 
+  const throttledLike = useThrottle(likePost, 500);
+
   const handleLikePost = (e) => {
     e.preventDefault();
     if (likingPending) return;
-    likePost(postId);
+    throttledLike(postId);
   };
 
   if (likingPending) {
@@ -72,10 +75,12 @@ const Post = ({ post, feedType, pageIndex, postIndex }) => {
     isPostSaved = !isPostSaved;
   }
 
+  const throttledSave = useThrottle(savePost, 500);
+
   const handleSavePost = (e) => {
     e.preventDefault();
     if (isSavingPost) return;
-    savePost(postId);
+    throttledSave(postId);
   };
 
   const { retweet, isRetweeting } = useRetweet(postId, feedType);
@@ -95,16 +100,16 @@ const Post = ({ post, feedType, pageIndex, postIndex }) => {
     <Link className=" cursor-default" to={`/post/${post._id}`}>
       <div
         className={
-          "flex gap-2 items-start border-b border-gray-700 px-4 pb-4 mb-4 transition-all duration-300 hover:bg-neutral-950 " +
+          "flex gap-2 items-start border-b border-neutral-700 px-4 pb-4 mb-4 transition-all duration-300 hover:bg-neutral-950 " +
           (isDeleting && "opacity-50")
         }
       >
-        <div
-          className="avatar cursor-pointer"
-          onClick={(e) => navigateToProfile(e)}
-        >
-          <div className="w-8 rounded-full overflow-hidden">
-            <img src={postOwner.profileImg || "/avatar-placeholder.png"} />
+        <div className=" cursor-pointer" onClick={(e) => navigateToProfile(e)}>
+          <div className="w-8 rounded-full overflow-hidden aspect-square">
+            <img
+              src={postOwner.profileImg || "/avatar-placeholder.png"}
+              className="object-cover w-full h-full"
+            />
           </div>
         </div>
 
@@ -183,7 +188,7 @@ const Post = ({ post, feedType, pageIndex, postIndex }) => {
             {post.img && (
               <img
                 src={post.img}
-                className="h-80 object-contain rounded-lg border border-gray-700"
+                className="h-80 object-contain rounded-lg border border-neutral-700"
                 alt=""
               />
             )}

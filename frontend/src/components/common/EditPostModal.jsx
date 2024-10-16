@@ -126,7 +126,7 @@ function EditPostModal({ id, text, feedType, editType, postId }) {
         id={`edit_${editType}_${feedType}_${id}`}
         className="modal overflow-y-auto border-none outline-none"
       >
-        <div className="modal-box justify-items-start cursor-auto self-start mt-[5vh] overflow-y-visible px-4 py-2  border rounded-2xl border-gray-700 shadow-md">
+        <div className="modal-box justify-items-start cursor-auto self-start mt-[5vh] overflow-y-visible px-4 py-2  border rounded-2xl border-neutral-700 shadow-md">
           <div className="flex pt-2 pb-4 font-bold">
             <button
               onClick={() => {

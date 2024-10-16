@@ -87,12 +87,30 @@ const getSuggestedUser = async (req, res) => {
       },
     },
     { $sample: { size: 10 } },
-    { $project: { password: 0 } },
+    { $project: { _id: 1, username: 1, fullName: 1, profileImg: 1 } },
   ]);
 
-  const suggestedUsers = users.slice(0, 4);
+  const suggestedUsers = users.slice(0, 3);
 
   res.status(200).json(suggestedUsers);
+};
+
+const getAllSuggestedUser = async (req, res) => {
+  const userId = req.user._id;
+
+  const followedUsers = req.user.following;
+  const idsToExclude = [userId, ...followedUsers];
+
+  const users = await User.aggregate([
+    {
+      $match: {
+        _id: { $nin: idsToExclude },
+      },
+    },
+    { $project: { _id: 1, username: 1, fullName: 1, profileImg: 1 } },
+  ]);
+
+  res.json(users);
 };
 
 const updateUser = async (req, res) => {
@@ -236,7 +254,7 @@ const getSearchedUser = async (req, res) => {
 
   const result = await User.find(query)
     .select("username fullName profileImg _id")
-    .limit(10)
+    .limit(20)
     .lean()
     .exec();
 
@@ -251,4 +269,5 @@ module.exports = {
   getUserFollowing,
   getUserFollowers,
   getSearchedUser,
+  getAllSuggestedUser,
 };

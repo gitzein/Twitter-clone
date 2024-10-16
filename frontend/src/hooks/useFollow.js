@@ -33,6 +33,7 @@ export const useFollow = () => {
         queryClient.invalidateQueries({ queryKey: ["authUser"] }),
         queryClient.invalidateQueries({ queryKey: ["userProfile"] }),
         queryClient.invalidateQueries({ queryKey: ["userFollow"] }),
+        queryClient.invalidateQueries({ queryKey: ["connect"] }),
       ]);
     },
     onError: (error) => toast.error(error.message),

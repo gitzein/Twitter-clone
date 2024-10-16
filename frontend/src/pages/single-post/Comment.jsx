@@ -9,6 +9,7 @@ import toast from "react-hot-toast";
 import LoadingSpinner from "../../components/common/LoadingSpinner";
 import DeleteComfirmationModal from "../../components/common/DeleteComfirmationModal";
 import { longStringChecker } from "../../utils/longStringChecker";
+import useThrottle from "../../hooks/useThrottle";
 
 function Comment({ comment, feedType, postId }) {
   const { data: authUser } = useQuery({ queryKey: ["authUser"] });
@@ -18,9 +19,9 @@ function Comment({ comment, feedType, postId }) {
   const queryClient = useQueryClient();
 
   const { mutate: deleteComment, isPending: isDeleting } = useMutation({
-    mutationFn: async () => {
+    mutationFn: async (commentId) => {
       try {
-        const res = await fetch(`/api/posts/comment/${comment._id}`, {
+        const res = await fetch(`/api/posts/comment/${commentId}`, {
           method: "DELETE",
         });
         const data = await res.json();
@@ -91,13 +92,15 @@ function Comment({ comment, feedType, postId }) {
     isLiked = !isLiked;
   }
 
+  const throttledLike = useThrottle(likeComment, 500);
+
   const handleLikeComment = () => {
     if (isLiking) return;
-    likeComment();
+    throttledLike(comment._id);
   };
 
   return (
-    <div className="flex gap-2 pt-2 pb-4 px-4 items-start border-b border-gray-600">
+    <div className="flex gap-2 pt-2 pb-4 px-4 items-start border-b border-neutral-600">
       <Link to={`/profile/${comment.from.username}`}>
         <div className="avatar">
           <div className="w-8 rounded-full">

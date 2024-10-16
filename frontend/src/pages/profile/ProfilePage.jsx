@@ -116,7 +116,7 @@ const ProfilePage = () => {
 
   return (
     <>
-      <div className="flex-[4_4_0]  border-r border-gray-700 min-h-screen ">
+      <div className="flex-[4_4_0]">
         {/* HEADER */}
         {(isLoading || isRefetching) && <ProfileHeaderSkeleton />}
         {!isLoading && !isRefetching && !user && (
@@ -125,13 +125,13 @@ const ProfilePage = () => {
         <div className="flex flex-col">
           {!isLoading && !isRefetching && user && (
             <>
-              <div className="flex gap-10 px-4 py-2 items-center">
+              <div className="flex gap-10 px-4 py-1 items-center  sticky top-0 bg-[rgb(0,0,0,0.6)] backdrop-blur-md z-40">
                 <Link to={-1}>
                   <FaArrowLeft className="w-4 h-4" />
                 </Link>
                 <div className="flex flex-col">
                   <p className="font-bold text-lg">{user?.fullName}</p>
-                  <span className="text-sm text-slate-500">
+                  <span className="text-sm text-gray-500">
                     {user.postTotal} posts
                   </span>
                 </div>
@@ -280,7 +280,7 @@ const ProfilePage = () => {
                   </Link>
                 </div>
               </div>
-              <div className="flex w-full border-b border-gray-700 mt-4">
+              <div className="flex w-full border-b border-neutral-700 mt-4">
                 <div
                   className={
                     "flex justify-center flex-1 p-3 hover:bg-secondary transition duration-300 relative cursor-pointer " +

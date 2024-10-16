@@ -11,6 +11,7 @@ import Layout from "./components/common/Layout";
 import FollowingPage from "./pages/profile/FollowingPage";
 import SinglePost from "./pages/single-post/SinglePost";
 import BookmarksPage from "./pages/bookmarks/BookmarksPage";
+import ConnectPage from "./pages/connect/ConnectPage";
 
 function App() {
   const { data: authUser, isLoading } = useQuery({
@@ -65,6 +66,7 @@ function App() {
             path="followers/:username"
             element={<FollowingPage followType={"followers"} />}
           />
+          <Route path="connect" element={<ConnectPage />} />
         </Route>
       </Routes>
       <Toaster />

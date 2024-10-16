@@ -63,9 +63,9 @@ const NotificationPage = () => {
 
   return (
     <>
-      <div className="flex-[4_4_0] border-l border-r border-gray-700 min-h-screen">
-        <div className="flex justify-between items-center p-4 border-b border-gray-700">
-          <p className="font-bold">Notifications</p>
+      <div className="flex-[4_4_0]">
+        <div className="flex justify-between items-center p-4 border-b border-neutral-700 sticky top-0 bg-[rgb(0,0,0,0.6)] backdrop-blur-md z-40">
+          <p className="font-bold text-xl">Notifications</p>
           <div className="dropdown dropdown-end">
             <div tabIndex={0} role="button" className="m-1">
               <IoSettingsOutline className="w-4" />
@@ -96,7 +96,7 @@ const NotificationPage = () => {
         {notifications?.map((notification) => (
           <div
             className={
-              "border-b border-gray-700 " +
+              "border-b border-neutral-700 " +
               (notification.read == "false" && "bg-gray-800")
             }
             key={notification._id}
