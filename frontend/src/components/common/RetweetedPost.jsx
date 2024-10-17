@@ -1,12 +1,12 @@
 import React from "react";
 import Post from "./Post";
 import { BiRepost } from "react-icons/bi";
-import { FaTrash } from "react-icons/fa";
 import { useDeletePost } from "../../hooks/useDeletePost";
 import { useQuery } from "@tanstack/react-query";
 import { Link } from "react-router-dom";
+import DeleteComfirmationModal from "./DeleteComfirmationModal";
 
-function RetweetedPost({ post, feedType, pageIndex, postIndex }) {
+function RetweetedPost({ post, feedType }) {
   const postOwner = post.user;
 
   const { data: authUser } = useQuery({ queryKey: ["authUser"] });
@@ -16,7 +16,7 @@ function RetweetedPost({ post, feedType, pageIndex, postIndex }) {
   const { deletePost, isDeleting } = useDeletePost(post._id, feedType);
 
   return (
-    <div className="hover:bg-neutral-950">
+    <div className={"hover:bg-neutral-950" + (isDeleting && "opacity-50")}>
       <div className="flex justify-between gap-2 mx-4 text-sm font-bold items-start p-1">
         <div className="flex flex-1 gap-1 items-center">
           <span className="text-gray-500 text-xl">
@@ -27,21 +27,20 @@ function RetweetedPost({ post, feedType, pageIndex, postIndex }) {
           </Link>
           <span className="text-gray-500">reposted</span>
         </div>
-        {isMyPost && !post && (
+        {isMyPost && !post.postReference && (
           <div>
-            <button
-              onClick={() => deletePost()}
-              className="cursor-pointer hover:text-red-500"
-            >
-              <FaTrash />
-            </button>
+            <DeleteComfirmationModal
+              func={deletePost}
+              id={post._id}
+              type={"post"}
+            />
           </div>
         )}
       </div>
       {!post.postReference ? (
         <div className="w-full p-4 border-b border-neutral-700  mb-4">
-          <p className="text-center border border-neutral-700 py-6 mb-2">
-            This post no longer exist
+          <p className="text-center border border-neutral-700 py-3 mb-2">
+            This post is no longer available
           </p>
         </div>
       ) : (

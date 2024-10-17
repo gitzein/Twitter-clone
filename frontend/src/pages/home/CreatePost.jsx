@@ -35,15 +35,16 @@ const CreatePost = () => {
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ text, img }),
         });
+        if (res.status === 500) throw new Error("Something went wrong");
         const data = await res.json();
         if (res.status === 413) {
           throw new Error("File size too large (Max 5 MB)");
         } else if (!res.ok) {
-          throw new Error(data.message || "Something went wrong");
+          throw new Error("Something went wrong");
         }
         return data;
       } catch (error) {
-        throw new Error(error);
+        throw error;
       }
     },
     onSuccess: () => {
@@ -164,7 +165,12 @@ const CreatePost = () => {
               </div>
             )}
             <button
-              disabled={isPending || !isImgSizeAllowed || textLimitReached}
+              disabled={
+                isPending ||
+                !isImgSizeAllowed ||
+                textLimitReached ||
+                (text.trim() === "" && !img)
+              }
               className="btn btn-primary rounded-full btn-sm text-white px-4"
             >
               {isPending ? "Posting..." : "Post"}

@@ -43,13 +43,7 @@ const Post = ({ post, feedType, pageIndex, postIndex }) => {
     deletePost();
   };
 
-  const { likePost, likingPending } = useLikePost(
-    postId,
-    "posts",
-    feedType,
-    pageIndex,
-    postIndex
-  );
+  const { likePost, likingPending } = useLikePost(postId, "posts", feedType);
 
   const throttledLike = useThrottle(likePost, 500);
 
@@ -241,7 +235,7 @@ const Post = ({ post, feedType, pageIndex, postIndex }) => {
                 {isPostSaved ? (
                   <FaBookmark className="w-4 h-4 text-sky-500 cursor-pointer" />
                 ) : (
-                  <FaRegBookmark className="w-4 h-4 text-slate-500 cursor-pointer" />
+                  <FaRegBookmark className="w-4 h-4 text-slate-500 cursor-pointer hover:text-sky-400" />
                 )}
               </div>
             </div>

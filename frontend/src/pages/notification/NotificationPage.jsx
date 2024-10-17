@@ -87,7 +87,7 @@ const NotificationPage = () => {
         </div>
         {(isLoading || isDeleting) && (
           <div className="flex justify-center h-full items-center">
-            <LoadingSpinner size="lg" />
+            <LoadingSpinner size="lg" color={"primary"} />
           </div>
         )}
         {notifications?.length === 0 && (

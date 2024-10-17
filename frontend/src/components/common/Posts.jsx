@@ -6,9 +6,10 @@ import { useInView } from "react-intersection-observer";
 import RetweetedPost from "./RetweetedPost";
 import { useEffect } from "react";
 import LoadingSpinner from "./LoadingSpinner";
+import RetryButton from "./RetryButton";
 
 const Posts = ({ feedType, username, userId }) => {
-  const { ref, inView } = useInView();
+  const { ref, inView } = useInView({ threshold: 0.2, triggerOnce: true });
 
   let POST_ENDPOINT;
   switch (feedType) {
@@ -30,11 +31,13 @@ const Posts = ({ feedType, username, userId }) => {
 
   const {
     data: posts,
-    status,
     fetchNextPage,
     isFetchingNextPage,
     hasNextPage,
     isFetching,
+    isPending,
+    isRefetching,
+    isFetchNextPageError,
   } = useInfiniteQuery({
     queryKey: ["posts", feedType],
     queryFn: async ({ pageParam }) => {
@@ -71,45 +74,52 @@ const Posts = ({ feedType, username, userId }) => {
 
   return (
     <div className="max-w-100%">
-      {(status === "pending" || isFetching) && (
+      {!isFetchingNextPage && (isRefetching || isPending) && (
         <div className="flex flex-col justify-center">
           <PostSkeleton />
           <PostSkeleton />
           <PostSkeleton />
         </div>
       )}
-      {(status !== "pending" || !isFetching) && posts.pages.length !== 0 && (
+
+      {posts?.pages.length !== 0 && !isRefetching && (
         <div>
-          {posts.pages.map((page) => {
+          {posts?.pages.map((page) => {
             return (
-              <div key={page.nextCursor}>
-                {page.posts.map((post) => {
+              <div key={page.nextCursor} ref={ref}>
+                {page.posts.map((post, i) => {
                   if (post.isRetweetedPost === true) {
                     return (
-                      <RetweetedPost
-                        key={post._id}
-                        post={post}
-                        feedType={feedType}
-                      />
+                      <>
+                        <RetweetedPost
+                          key={post._id}
+                          post={post}
+                          feedType={feedType}
+                        />
+                      </>
                     );
                   } else {
                     return (
-                      <Post key={post._id} post={post} feedType={feedType} />
+                      <>
+                        <Post key={post._id} post={post} feedType={feedType} />
+                      </>
                     );
                   }
                 })}
               </div>
             );
           })}
-          <div ref={ref} className="pb-[30vh] w-full flex justify-center">
-            {isFetchingNextPage ? (
-              <LoadingSpinner size="lg" />
-            ) : !hasNextPage ? (
-              <p className="text-gray-700">No more post</p>
-            ) : null}
-          </div>
         </div>
       )}
+      <div className="pb-[30vh] w-full flex justify-center">
+        {isFetchingNextPage ? (
+          <LoadingSpinner size="lg" color={"primary"} />
+        ) : isFetchNextPageError ? (
+          <RetryButton onClickHandler={() => fetchNextPage()} />
+        ) : !hasNextPage ? (
+          <p className="text-gray-700">No more post</p>
+        ) : null}
+      </div>
     </div>
   );
 };

@@ -28,7 +28,7 @@ function SearchList({ searchParam }) {
       )}
       {isSearching && (
         <div className="w-full pt-4 flex justify-center">
-          <LoadingSpinner size="sm" />
+          <LoadingSpinner size="sm" color={"primary"} />
         </div>
       )}
       {searchResult && searchResult.length !== -1 && !isSearching && (
