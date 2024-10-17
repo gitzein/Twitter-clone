@@ -78,7 +78,7 @@ function CommentInput({ postComment, isCommenting, authUser, inputRef }) {
               </div>
             )}
             <button
-              disabled={commentLimitReached}
+              disabled={commentLimitReached || comment.trim() === ""}
               className="btn btn-primary rounded-full btn-sm text-white px-4"
             >
               {isCommenting ? <LoadingSpinner size="md" /> : "Post"}

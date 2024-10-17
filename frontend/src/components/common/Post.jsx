@@ -98,7 +98,10 @@ const Post = ({ post, feedType, pageIndex, postIndex }) => {
           (isDeleting && "opacity-50")
         }
       >
-        <div className=" cursor-pointer" onClick={(e) => navigateToProfile(e)}>
+        <div
+          className=" cursor-pointer pt-1"
+          onClick={(e) => navigateToProfile(e)}
+        >
           <div className="w-8 rounded-full overflow-hidden aspect-square">
             <img
               src={postOwner.profileImg || "/avatar-placeholder.png"}
@@ -110,13 +113,16 @@ const Post = ({ post, feedType, pageIndex, postIndex }) => {
         <div className="flex flex-col flex-1">
           <div className="flex gap-1 items-center">
             <div
-              className="font-bold cursor-pointer hover:underline"
+              className="flex flex-col cursor-pointer hover:underline"
               onClick={(e) => navigateToProfile(e)}
             >
-              {postOwner.fullName}
+              <div className=" font-bold">{postOwner.fullName}</div>
+              <div className="block sm:hidden text-gray-700 text-xs">
+                @{postOwner.username}
+              </div>
             </div>
             <span className="text-gray-700 flex items-center gap-1 text-sm">
-              <div>@{postOwner.username}</div>
+              <div className="hidden sm:block">@{postOwner.username}</div>
               <span>·</span>
               <span>{formattedPostDate}</span>
               {post.isEdited && (

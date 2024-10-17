@@ -75,7 +75,7 @@ const Posts = ({ feedType, username, userId }) => {
   return (
     <div className="max-w-100%">
       {!isFetchingNextPage && (isRefetching || isPending) && (
-        <div className="flex flex-col justify-center">
+        <div className="flex flex-col justify-center w-full">
           <PostSkeleton />
           <PostSkeleton />
           <PostSkeleton />

@@ -15,7 +15,7 @@ function Search({
       onFocus={() => setFocusSearch(true)}
       className="sticky top-0 py-2 bg-black"
     >
-      <div className="flex flex-col min-w-80">
+      <div className="flex flex-col sm:min-w-80">
         <div className="relative">
           <SearchBar
             searchParam={searchParam}

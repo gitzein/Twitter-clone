@@ -9,16 +9,14 @@ import {
   FaUser,
 } from "react-icons/fa";
 import { Link, useLocation } from "react-router-dom";
-import { BiLogOut } from "react-icons/bi";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import toast from "react-hot-toast";
+import { useQuery } from "@tanstack/react-query";
 import { BsHouseDoor, BsHouseDoorFill } from "react-icons/bs";
-import { FaMagnifyingGlass } from "react-icons/fa6";
+import LogoutComfirmationModal from "./LogoutComfirmationModal";
+import SearchModal from "./SearchModal";
 
-const Sidebar = ({ setShowBar, showSearch }) => {
+const Sidebar = () => {
   const { data: authUser } = useQuery({ queryKey: ["authUser"] });
 
-  const queryClient = useQueryClient();
   let location = useLocation();
 
   const { data: unreadNotif } = useQuery({
@@ -35,32 +33,9 @@ const Sidebar = ({ setShowBar, showSearch }) => {
     },
   });
 
-  const { mutate: logout } = useMutation({
-    mutationFn: async () => {
-      try {
-        const res = await fetch("/api/auth/logout", {
-          method: "POST",
-        });
-        const data = await res.json();
-
-        if (!res.ok) {
-          throw new Error("Something went wrong");
-        }
-      } catch (error) {
-        throw error;
-      }
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["authUser"] });
-    },
-    onError: () => {
-      toast.error("Logout failed");
-    },
-  });
-
   return (
-    <div className="lg:flex-[2_2_0] w-18 max-w-52">
-      <div className="sticky top-0 left-0 h-screen flex flex-col border-r border-neutral-700 w-20 lg:w-full">
+    <div className="hidden md:block lg:flex-[2_2_0] w-18 max-w-52  border-r border-neutral-700">
+      <div className="sticky top-0 left-0 h-screen flex flex-col w-20 lg:w-full">
         <Link to="/" className="flex justify-center lg:justify-start">
           <XSvg className="px-2 w-12 h-12 rounded-full fill-white hover:bg-stone-900" />
         </Link>
@@ -78,17 +53,6 @@ const Sidebar = ({ setShowBar, showSearch }) => {
 
               <span className="text-lg hidden lg:block">Home</span>
             </Link>
-          </li>
-          <li className="flex justify-center lg:hidden items-center">
-            <div
-              className={
-                "hover:bg-stone-900 transition-all rounded-full duration-500 py-2 px-2 cursor-pointer " +
-                (showSearch && "text-primary")
-              }
-              onClick={() => setShowBar(!showSearch)}
-            >
-              <FaMagnifyingGlass className={"w-7 h-7 "} />
-            </div>
           </li>
           <li className="flex justify-center lg:justify-start items-center">
             <Link
@@ -139,6 +103,11 @@ const Sidebar = ({ setShowBar, showSearch }) => {
               <span className="text-lg hidden lg:block">Bookmarks</span>
             </Link>
           </li>
+          <li className="flex justify-center lg:hidden items-center">
+            <div className="flex gap-3 items-center hover:bg-stone-900 transition-all rounded-full duration-500lg:pl-2 lg:pr-4  max-w-fit cursor-pointer">
+              <SearchModal type={"sidebar"} />
+            </div>
+          </li>
         </ul>
         {authUser && (
           <div className="mt-auto mb-10 flex gap-2 flex-col items-center lg:flex-row  justify-center transition-all duration-300 lg:hover:bg-[#181818] py-2 px-4 rounded-full">
@@ -164,15 +133,7 @@ const Sidebar = ({ setShowBar, showSearch }) => {
                 </div>
               </div>
             </Link>
-            <div className="flex justify-center items-center p-2 rounded-full transition-all duration-500 hover:bg-primary">
-              <BiLogOut
-                className="text-2xl cursor-pointer"
-                onClick={(e) => {
-                  e.preventDefault();
-                  logout();
-                }}
-              />
-            </div>
+            <LogoutComfirmationModal type={"sidebar"} />
           </div>
         )}
       </div>

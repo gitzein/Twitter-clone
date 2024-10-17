@@ -126,13 +126,13 @@ const NotificationPage = () => {
                   <BiRepost className="w-7 h-7 text-green-500" />
                 )}
                 <div
-                  className="flex items-center gap-2"
+                  className="flex items-center gap-2 max-w-full"
                   onClick={(e) => {
                     e.preventDefault();
                     navigate(`/profile/${notification.from.username}`);
                   }}
                 >
-                  <div className="avatar">
+                  <div className="hidden sm:avatar">
                     <div className="w-8 rounded-full">
                       <img
                         src={

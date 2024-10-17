@@ -48,6 +48,21 @@ function DeleteComfirmationModal({ id, func, type }) {
             </button>
           </div>
         </div>
+        <form
+          method="dialog"
+          className="modal-backdrop bg-sky-200 opacity-20"
+          name="close-comment-modal"
+        >
+          <button
+            className="outline-none"
+            onClick={(e) => {
+              e.preventDefault();
+              document.getElementById(`delete_${type}_modal_${id}`).close();
+            }}
+          >
+            close
+          </button>
+        </form>
       </dialog>
     </div>
   );

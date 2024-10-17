@@ -42,7 +42,7 @@ function App() {
   }
 
   return (
-    <div className="flex max-w-6xl mx-auto">
+    <div className="flex flex-col md:flex-row max-w-6xl mx-auto">
       <Routes>
         <Route
           path="login"
