@@ -35,7 +35,7 @@ const RightPanel = () => {
 
   return (
     <>
-      <div className="w-[5vw] md:w-[15vw] lg:hidden" />
+      <div className="hidden md:block md:w-[15vw] lg:hidden" />
       <div className="hidden lg:block mx-2">
         <Search
           searchRef={searchRef}

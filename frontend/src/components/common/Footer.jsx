@@ -75,11 +75,6 @@ function Footer() {
             <SearchModal type={"footer"} />
           </div>
         </li>
-        <li className="flex justify-center lg:hidden items-center">
-          <div className="flex gap-3 items-center hover:bg-stone-900 transition-all rounded-full duration-500  lg:pl-2 lg:pr-4  max-w-fit cursor-pointer">
-            <LogoutComfirmationModal type={"footer"} />
-          </div>
-        </li>
       </ul>
     </div>
   );

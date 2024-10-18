@@ -9,7 +9,7 @@ function Layout() {
   return (
     <>
       <Sidebar />
-      <div className="flex-[4_4_0] flex-col border-r border-neutral-700 min-h-screen sm:mr-auto">
+      <div className="flex-[4_4_0] flex-col border-r border-neutral-700 min-h-screen md:mr-auto">
         <Outlet />
       </div>
       <Footer />

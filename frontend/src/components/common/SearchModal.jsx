@@ -4,7 +4,7 @@ import Search from "./Search";
 import useOutsideClick from "../../hooks/useOutsideClick";
 import { useQuery } from "@tanstack/react-query";
 import { useFollow } from "../../hooks/useFollow";
-import { Link, useLocation } from "react-router-dom";
+import { Link } from "react-router-dom";
 import RightPanelSkeleton from "../skeletons/RightPanelSkeleton";
 import LoadingSpinner from "./LoadingSpinner";
 
@@ -14,8 +14,6 @@ function SearchModal({ type }) {
   const searchBarRef = useRef();
 
   useOutsideClick(searchBarRef, () => setFocusSearch(false));
-
-  let location = useLocation();
 
   const { data: suggestedUsers, isLoading } = useQuery({
     queryKey: ["suggestedUsers"],
@@ -44,7 +42,7 @@ function SearchModal({ type }) {
         <FaMagnifyingGlass className={"w-6 h-6 "} />
       </button>
       <dialog id={`search_modal_${type}`} className="modal cursor-default">
-        <div className="modal-box w-[90vw] h-fit self-start mt-[5vh] flex flex-col rounded-2xl overflow-visible shadow-md shadow-neutral-500 bg-black">
+        <div className="modal-box w-[90vw] min-h-[25vh] self-start mt-[5vh] pt-2 pb-16 flex flex-col rounded-2xl overflow-visible shadow-md shadow-neutral-500 bg-[rgb(0,0,0,0.8)] ">
           <Search
             searchRef={searchBarRef}
             searchParam={searchParam}
@@ -53,7 +51,7 @@ function SearchModal({ type }) {
             setFocusSearch={setFocusSearch}
           />
           {isLoading && (
-            <div className="bg-transparent py-3 my-2 border flex flex-col border-neutral-700 rounded-xl min-w-80">
+            <div className="py-3 my-2 border flex flex-col border-neutral-700 rounded-xl min-w-80 bg-black">
               <p className="font-bold text-lg pb-2 px-3">Who to follow</p>
               <div className="flex flex-col">
                 <RightPanelSkeleton />
@@ -63,64 +61,62 @@ function SearchModal({ type }) {
               </div>
             </div>
           )}
-          {suggestedUsers?.length !== 0 &&
-            !isLoading &&
-            location.pathname !== "/connect" && (
-              <div className="bg-transparent pt-3 my-2 border flex flex-col border-neutral-700 rounded-2xl w-full overflow-hidden">
-                <p className="font-bold text-lg pb-2 px-3">Who to follow</p>
-                <div className="flex flex-col">
-                  {suggestedUsers.map((user) => (
-                    <Link
-                      to={`/profile/${user.username}`}
-                      className="flex items-center justify-between p-3 hover:bg-neutral-950"
-                      key={user._id}
-                      onClick={() =>
-                        document.getElementById(`search_modal_${type}`).close()
-                      }
-                    >
-                      <div className="flex gap-2 items-center">
-                        <div className="w-8 rounded-full overflow-hidden  aspect-square">
-                          <img
-                            src={user.profileImg || "/avatar-placeholder.png"}
-                            className="w-full h-full object-cover"
-                          />
-                        </div>
-                        <div className="flex flex-col">
-                          <span className="font-semibold tracking-tight truncate w-28">
-                            {user.fullName}
-                          </span>
-                          <span className="text-sm text-slate-500">
-                            @{user.username}
-                          </span>
-                        </div>
-                      </div>
-                      <div>
-                        <button
-                          className="btn bg-white text-black hover:bg-white hover:opacity-90 rounded-full btn-sm"
-                          onClick={(e) => {
-                            e.preventDefault();
-                            follow(user._id);
-                          }}
-                        >
-                          {isPending ? <LoadingSpinner size="sm" /> : "Follow"}
-                        </button>
-                      </div>
-                    </Link>
-                  ))}
-                </div>
-                {suggestedUsers.length > 2 && (
+          {suggestedUsers?.length !== 0 && !isLoading && (
+            <div className="pt-3 my-2 border flex flex-col border-neutral-700 rounded-2xl w-full bg-black overflow-hidden">
+              <p className="font-bold text-lg pb-2 px-3">Who to follow</p>
+              <div className="flex flex-col">
+                {suggestedUsers.map((user) => (
                   <Link
-                    to={"connect"}
-                    className="w-full hover:bg-neutral-950 px-3"
+                    to={`/profile/${user.username}`}
+                    className="flex items-center justify-between p-3 hover:bg-neutral-950"
+                    key={user._id}
                     onClick={() =>
                       document.getElementById(`search_modal_${type}`).close()
                     }
                   >
-                    <div className="text-primary pt-3 pb-4">Show more</div>
+                    <div className="flex gap-2 items-center">
+                      <div className="w-8 rounded-full overflow-hidden  aspect-square">
+                        <img
+                          src={user.profileImg || "/avatar-placeholder.png"}
+                          className="w-full h-full object-cover"
+                        />
+                      </div>
+                      <div className="flex flex-col">
+                        <span className="font-semibold tracking-tight truncate w-28">
+                          {user.fullName}
+                        </span>
+                        <span className="text-sm text-slate-500">
+                          @{user.username}
+                        </span>
+                      </div>
+                    </div>
+                    <div>
+                      <button
+                        className="btn bg-white text-black hover:bg-white hover:opacity-90 rounded-full btn-sm"
+                        onClick={(e) => {
+                          e.preventDefault();
+                          follow(user._id);
+                        }}
+                      >
+                        {isPending ? <LoadingSpinner size="sm" /> : "Follow"}
+                      </button>
+                    </div>
                   </Link>
-                )}
+                ))}
               </div>
-            )}
+              {suggestedUsers.length > 2 && (
+                <Link
+                  to={"connect"}
+                  className="w-full hover:bg-neutral-950 px-3"
+                  onClick={() =>
+                    document.getElementById(`search_modal_${type}`).close()
+                  }
+                >
+                  <div className="text-primary pt-3 pb-4">Show more</div>
+                </Link>
+              )}
+            </div>
+          )}
         </div>
         <form
           method="dialog"

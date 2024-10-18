@@ -13,7 +13,7 @@ function Search({
     <div
       ref={searchRef}
       onFocus={() => setFocusSearch(true)}
-      className="sticky top-0 py-2 bg-black"
+      className="sticky top-0 my-2 bg-black rounded-full"
     >
       <div className="flex flex-col sm:min-w-80">
         <div className="relative">
@@ -24,7 +24,7 @@ function Search({
             setFocus={setFocusSearch}
           />
         </div>
-        <div className="absolute z-20 top-14 w-full shadow-md shadow-neutral-500 rounded-lg">
+        <div className="absolute z-20 top-12 w-full shadow-md shadow-neutral-500 rounded-lg">
           {focusSearch && <SearchList searchParam={searchParam} />}
         </div>
       </div>
