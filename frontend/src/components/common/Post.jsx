@@ -17,8 +17,8 @@ import { useRetweet } from "../../hooks/useRetweet";
 import { Link, useNavigate } from "react-router-dom";
 import DeleteComfirmationModal from "./DeleteComfirmationModal";
 import { longStringChecker } from "../../utils/longStringChecker";
-import { LineBreaker } from "../../utils/lineBreaker";
 import useThrottle from "../../hooks/useThrottle";
+import ApplyLineBreak from "../../utils/ApplyLineBreak";
 
 const Post = ({ post, feedType, pageIndex, postIndex }) => {
   const { data: authUser } = useQuery({ queryKey: ["authUser"] });
@@ -183,7 +183,7 @@ const Post = ({ post, feedType, pageIndex, postIndex }) => {
                 (longStringChecker(post.text) && "break-all")
               }
             >
-              <LineBreaker string={post.text} />
+              <ApplyLineBreak string={post.text} />
             </div>
             {post.img && (
               <img

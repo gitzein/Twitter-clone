@@ -26,8 +26,8 @@ import { longStringChecker } from "../../utils/longStringChecker";
 import OptimisticComment from "./OptimisticComment";
 import { useSavePost } from "../../hooks/useSavePost";
 import CommentInput from "./CommentInput";
-import { LineBreaker } from "../../utils/lineBreaker";
 import useThrottle from "../../hooks/useThrottle";
+import ApplyLineBreak from "../../utils/ApplyLineBreak";
 
 function SinglePost() {
   const { id: postId } = useParams();
@@ -219,7 +219,7 @@ function SinglePost() {
                     (longStringChecker(post.text) && "break-all")
                   }
                 >
-                  <LineBreaker string={post.text} />
+                  <ApplyLineBreak string={post.text} />
                 </div>
                 {post.img && (
                   <img
