@@ -1,5 +1,6 @@
 require("dotenv").config();
 require("express-async-errors");
+const path = require("path");
 const express = require("express");
 const mongoose = require("mongoose");
 const connectDB = require("./config/dbConn");
@@ -8,6 +9,7 @@ const app = express();
 const { v2: cloudinary } = require("cloudinary");
 
 const PORT = process.env.PORT || 3500;
+__dirname = path.resolve();
 
 connectDB();
 
@@ -27,6 +29,14 @@ app.use("/api/auth", require("./routes/authRoutes"));
 app.use("/api/users", require("./routes/userRoutes"));
 app.use("/api/posts", require("./routes/postRoutes"));
 app.use("/api/notification", require("./routes/notificationRoutes"));
+
+if (process.env.NODE_ENV === "production") {
+  app.use(express.static(path.join(__dirname, "/frontend/dist")));
+
+  app.get("*", (req, res) => {
+    res.sendFile(path.resolve(__dirname, "frontend", "dist", "index.html"));
+  });
+}
 
 mongoose.connection.once("connected", () => {
   app.listen(PORT, () => {

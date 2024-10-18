@@ -23,7 +23,10 @@ const HomePage = () => {
       <div className="flex-[4_4_0] ">
         <div className="flex flex-col md:flex-row w-full border-b border-neutral-700 sticky top-0 z-50 bg-[rgb(0,0,0,0.6)] backdrop-blur-md">
           <div className="flex justify-between px-4 pb-1 pt-2 md:hidden">
-            <Link to={`/profile/${authUser.username}`}>
+            <Link
+              to={`/profile/${authUser.username}`}
+              className="flex items-center"
+            >
               <div className="avatar flex items-center">
                 <div className="w-9 h-9 rounded-full">
                   <img
