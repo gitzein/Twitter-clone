@@ -130,6 +130,7 @@ const deletePost = async (req, res) => {
   res.json({ message: "Post deleted" });
 };
 
+// Not used
 const getAllPosts = async (req, res) => {
   const posts = await Post.find()
     .sort({ createdAt: -1 })
@@ -145,6 +146,7 @@ const getAllPosts = async (req, res) => {
   res.json(posts);
 };
 
+// Not used
 const getLikedPosts = async (req, res) => {
   const userId = req.params.id;
   const { cursor, limit = 10 } = req.query;
@@ -163,7 +165,6 @@ const getLikedPosts = async (req, res) => {
 
   if (cursor) {
     const cursorIndex = likedPostsReverseIds.indexOf(cursor) + 1;
-    console.log("cursorIndex:", cursorIndex, "cursor:", cursor);
 
     queryIdsArr = likedPostsReverseIds.slice(
       cursorIndex,
@@ -171,7 +172,6 @@ const getLikedPosts = async (req, res) => {
     );
     query._id = queryIdsArr;
   }
-  console.log("queryIdsArr:", queryIdsArr);
 
   const unsortedPosts = await Post.find(query)
     .limit(Number(limit))
@@ -216,16 +216,6 @@ const getLikedPosts = async (req, res) => {
       ? sortedAndValidatedPosts[sortedAndValidatedPosts.length - 1]._id
       : null; */
 
-  console.log(
-    "index:",
-    likedPostsReverseIds.indexOf(cursor) + 1 !== likedPostsReverseIds.length,
-    likedPostsReverseIds.indexOf(
-      queryIdsArr[queryIdsArr.length - 1]?.toString()
-    ) + 1,
-    likedPostsReverseIds.length,
-    queryIdsArr.length !== 0
-  );
-
   const nextCursor =
     sortedAndValidatedPosts.length > 0
       ? sortedAndValidatedPosts[sortedAndValidatedPosts.length - 1]._id
@@ -244,8 +234,6 @@ const getLikedPosts = async (req, res) => {
           ]
         : null
       : null;
-
-  console.log(nextCursor);
 
   // filtering posts thats not User's own post to be shown on the front end
   const otherUserOnlyPosts = sortedAndValidatedPosts.filter(
@@ -590,6 +578,7 @@ const savePost = async (req, res) => {
   res.json(user.savedPosts);
 };
 
+// Not used
 const getSavedPosts = async (req, res) => {
   const userId = req.user._id;
 
